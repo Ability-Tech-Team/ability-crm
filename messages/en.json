@@ -1,0 +1,11 @@
+{
+  "Metadata": {
+    "title": "Ability CRM",
+    "description": "Customer relationship management by Ability-Tech."
+  },
+  "Home": {
+    "title": "Ability CRM",
+    "description": "This application is under construction. Features will be added incrementally.",
+    "switchLocale": "{locale, select, en {English} ar {العربية} other {{locale}}}"
+  }
+}
