@@ -7,5 +7,26 @@
     "title": "Ability CRM",
     "description": "This application is under construction. Features will be added incrementally.",
     "switchLocale": "{locale, select, en {English} ar {العربية} other {{locale}}}"
+  },
+  "Access": {
+    "signedInAs": "Signed in as <strong>{name}</strong>",
+    "backToPortal": "Back to Ability Portal",
+    "tryAgain": "Try again",
+    "not_subscribed": {
+      "title": "Ability CRM isn’t included in your subscription",
+      "description": "Contact Ability Tech to add it to your subscription."
+    },
+    "locked": {
+      "title": "Ability CRM is locked for your account",
+      "description": "Contact Ability Tech to unlock it."
+    },
+    "unknown": {
+      "title": "Ability CRM isn’t available for your account",
+      "description": "Contact Ability Tech if you need it."
+    },
+    "unavailable": {
+      "title": "We couldn’t check your access",
+      "description": "The sign-in service didn’t answer, so Ability CRM can’t open right now. Try again in a moment."
+    }
   }
 }
