@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Toaster } from "sonner";
+import MaintenanceProvider from "@/src/components/MaintenanceProvider";
 import { getLocaleDirection, routing } from "@/src/i18n/routing";
 import "../globals.css";
 
@@ -30,10 +32,21 @@ export default async function LocaleLayout({ children, params }: Props) {
     notFound();
   }
 
+  const direction = getLocaleDirection(locale);
+
   return (
-    <html lang={locale} dir={getLocaleDirection(locale)}>
+    <html lang={locale} dir={direction}>
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <MaintenanceProvider>{children}</MaintenanceProvider>
+          <Toaster
+            position={direction === "rtl" ? "top-left" : "top-right"}
+            dir={direction}
+            richColors
+            closeButton
+            duration={4000}
+          />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

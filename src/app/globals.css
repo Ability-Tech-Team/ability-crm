@@ -1,1 +1,502 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* RTL Support */
+[dir='rtl'] {
+  text-align: right;
+}
+
+[dir='ltr'] {
+  text-align: left;
+}
+
+/* Flip elements for RTL */
+[dir='rtl'] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* ── Print Receipt Styles ───────────────────────────────── */
+
+/* Hide the print area on screen */
+.print-area {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    direction: ltr !important;
+    text-align: left !important;
+  }
+
+  /* Hide everything on the page except the print area */
+  body > *:not(.print-area) {
+    display: none !important;
+  }
+
+  /* Show only the print area */
+  body > .print-area {
+    display: block !important;
+    position: static !important;
+    inset: auto;
+    z-index: auto;
+    background: #fff;
+    overflow: visible !important;
+    width: 100% !important;
+    zoom: 150%;
+    direction: ltr !important;
+    text-align: left !important;
+  }
+
+  .print-receipt {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding-left: 10mm;
+    padding-right: 10mm;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 11px;
+    color: #000;
+    line-height: 1.1;
+  }
+
+  [dir='rtl'] .print-receipt {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .receipt-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #000;
+  }
+
+  .receipt-logo {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+  }
+
+  .receipt-project {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    color: #111;
+  }
+
+  .receipt-header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .receipt-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .receipt-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #222;
+  }
+
+  .receipt-status {
+    font-size: 13px;
+    margin-top: 2px;
+    color: #444;
+  }
+
+  .receipt-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 1px solid #000;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .receipt-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #000;
+    background: #f3f3f3;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .receipt-total-label {
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .receipt-total-value {
+    font-size: 15px;
+  }
+
+  .receipt-total-secondary {
+    margin-top: -12px;
+    border-top: none;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .receipt-total-secondary .receipt-total-value {
+    font-size: 13px;
+  }
+
+  .receipt-divider {
+    border: none;
+    border-top: 1px dashed #999;
+    margin: 14px 0;
+  }
+
+  .receipt-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+    margin-bottom: 14px;
+  }
+
+  .receipt-info-table td {
+    padding: 6px 8px;
+    vertical-align: top;
+    border: 1px solid #000;
+  }
+
+  .receipt-label {
+    font-weight: 700;
+    white-space: nowrap;
+    color: #111;
+    background: #f3f3f3;
+    width: 1%;
+  }
+
+  .receipt-value {
+    color: #000;
+    text-align: end;
+  }
+
+  .receipt-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 6px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .receipt-services-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    border: 1px solid #000;
+    margin-bottom: 14px;
+  }
+
+  .receipt-services-table th {
+    border: 1px solid #000;
+    background: #f3f3f3;
+    padding: 6px 4px;
+    text-align: start;
+    font-weight: 700;
+  }
+
+  .receipt-services-table td {
+    padding: 6px 4px;
+    border: 1px solid #000;
+  }
+
+  .receipt-services-table tfoot td {
+    border-top: 1px solid #000;
+    border-bottom: none;
+    padding-top: 6px;
+    font-size: 11px;
+  }
+
+  .receipt-footer {
+    text-align: center;
+    font-size: 9px;
+    color: #666;
+    margin-top: 14px;
+  }
+
+  .receipt-printed-by {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    border: 1px solid #000;
+    font-size: 11px;
+  }
+
+  .receipt-printed-by .receipt-label {
+    background: transparent;
+  }
+
+  /* ── Report Table Print Styles ──────────────────────────── */
+
+  .print-report {
+    width: 100%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 12px;
+    color: #000;
+    line-height: 1.5;
+    overflow: visible !important;
+  }
+
+  [dir='rtl'] .print-report {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .print-report-page {
+    padding: 10mm;
+    break-after: page;
+    page-break-after: always;
+    overflow: visible !important;
+  }
+
+  .print-report-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .print-report h1 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  .print-report .print-report-date {
+    font-size: 11px;
+    color: #444;
+    margin: 0 0 12px;
+  }
+
+  .print-report table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: auto;
+    table-layout: fixed;
+  }
+
+  .print-report thead {
+    display: table-header-group;
+  }
+
+  .print-report tfoot {
+    display: table-footer-group;
+  }
+
+  .print-report th {
+    border-bottom: 2px solid #000;
+    padding: 6px 8px;
+    text-align: start;
+    font-weight: 700;
+    font-size: 11px;
+  }
+
+  .print-report td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #ddd;
+    font-size: 11px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .print-report tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-report tfoot td {
+    border-top: 2px solid #000;
+    border-bottom: none;
+    font-weight: 700;
+    padding-top: 6px;
+  }
+
+  /* Cancel the global 150% zoom (intended for receipts) for report tables,
+     and use a content-aware layout so columns don't overlap. */
+  body > .print-area:has(.print-report) {
+    zoom: 1 !important;
+  }
+
+  .print-report--landscape table {
+    table-layout: auto;
+  }
+
+  .print-report--landscape th,
+  .print-report--landscape td {
+    font-size: 9px;
+    padding: 3px 4px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .print-report--landscape h1 {
+    font-size: 14px;
+  }
+
+  /* ── CTS Card Print Styles ───────────────────────────────── */
+
+  .cts-print-card {
+    width: 190mm;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 10mm 8mm;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 10px;
+    color: #111;
+    line-height: 1.5;
+    background: #fff;
+  }
+
+  .cts-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .cts-card-logo {
+    width: 48px !important;
+    height: 48px !important;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .cts-card-title-block {
+    flex: 1;
+  }
+
+  .cts-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin: 0 0 2px;
+    letter-spacing: 0.3px;
+  }
+
+  .cts-card-subtitle {
+    font-size: 12px;
+    color: #444;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .cts-card-date {
+    font-size: 9px;
+    color: #666;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  .cts-card-rule {
+    border: none;
+    border-top: 1.5px solid #333;
+    margin: 6px 0;
+  }
+
+  .cts-card-section {
+    margin-bottom: 6px;
+  }
+
+  .cts-card-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #222;
+    border-bottom: 1px solid #bbb;
+    padding-bottom: 2px;
+    margin: 0 0 5px;
+  }
+
+  .cts-card-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+  }
+
+  .cts-card-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .cts-card-table td {
+    padding: 2px 0;
+    vertical-align: top;
+  }
+
+  .cts-card-label {
+    font-weight: 600;
+    white-space: nowrap;
+    padding-right: 8px;
+    color: #444;
+    width: 45%;
+    font-size: 9.5px;
+  }
+
+  .cts-card-value {
+    color: #111;
+    font-size: 9.5px;
+    word-break: break-word;
+  }
+
+  .cts-card-notes {
+    margin: 5px 0 0;
+    font-size: 9.5px;
+    color: #333;
+    border-left: 2px solid #888;
+    padding-left: 6px;
+  }
+
+  .cts-card-notes-label {
+    font-weight: 700;
+  }
+
+  .cts-card-services-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 14px;
+    margin-bottom: 6px;
+  }
+
+  .cts-card-service-box {
+    min-width: 0;
+  }
+
+  .cts-card-footer {
+    text-align: center;
+    font-size: 8px;
+    color: #888;
+    margin-top: 6px;
+  }
+}

@@ -6,21 +6,19 @@ import {
   getPortalBaseUrl,
   localeFromPathname,
 } from "./lib/portal";
-import { SESSION_COOKIE_NAME } from "./lib/sessionCookie";
-import { isWellFormedToken } from "./lib/tokens";
+import { SESSION_DETAILS_COOKIE } from "./lib/sessionDetails";
 
 const handleI18nRouting = createMiddleware(routing);
 
 /**
- * Locale routing, plus an early redirect for clients without a session
- * cookie: they sign in on the Portal and come back to the exact page they
- * asked for. This is only an optimistic check; every page still verifies the
- * session with the account service (src/lib/access.ts).
+ * Locale routing, plus an early redirect for visits without the Portal's
+ * session cookie: the user signs in on the Portal and comes back to the exact
+ * page they asked for. This is only an optimistic check; the app layout
+ * validates the cookie, and the API checks the `access_token` cookie on every
+ * call.
  */
 export default function proxy(request: NextRequest) {
-  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-
-  if (!isWellFormedToken(token)) {
+  if (!request.cookies.get(SESSION_DETAILS_COOKIE)?.value) {
     const portalBaseUrl = getPortalBaseUrl();
 
     if (portalBaseUrl) {

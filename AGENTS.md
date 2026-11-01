@@ -18,58 +18,76 @@ the workspace instead of assuming it exists.
   `../Amer-CRM`, `../Ability-Community-Admin`, or `../Ability-Portal`. Copy and
   adapt reference code from Amer CRM when useful, and record its source in
   `../docs/MIGRATION.md`.
-- **Status (2026-10-01):** the placeholder page now sits behind the access
-  check; there is no business module or business API client yet. The checks
-  below were verified against a contract stand-in, but the account service
-  itself doesn't exist yet, so without it (or without the settings) every page
-  shows the access-check error. Do not expose protected features without the
-  check, and do not add a stub, bypass, or demo mode.
-- **Sign-in and access** (rules in `../AGENTS.md`): clients sign in once, on
-  Ability Portal; this app has no password form and keeps no passwords. It
-  reads the Portal's `ability_session` cookie and never sets or deletes it.
-  - `src/proxy.ts`: without a well-formed session cookie, redirects straight
-    to `<PORTAL_URL>/<locale>/sign-in?returnTo=<this page>`. This is only an
+- **Status (2026-10-29):** Amer CRM's screens are ported from its
+  `development` branch and adapted to the Ability CRM backend
+  (`../docs/ABILITY-CRM-BACKEND-CHANGES.md`): SAP removed, ERP account codes,
+  `customer_id` on tickets, complaints, invoices, CTS, and documents, uploaded
+  unit debt, ownership end and edit, and the new Imports screens. The dev API
+  accepts the Portal's cookie but lacks the startup routes and CORS, so the
+  screens were checked against a contract stand-in only (`../docs/MIGRATION.md`). Not ported: the public
+  rental-request pages, Amer's legal templates, and the walk-in request edit
+  (its route was removed). Do not add a stub, bypass, or demo mode to the app.
+- **Sign-in and session** (decided 2026-10-29; rules in `../AGENTS.md`): users
+  sign in on Ability Portal; this app has no sign-in page and keeps no
+  passwords. The backend's HttpOnly `access_token` cookie is the session, and
+  the backend's users, roles, and privileges are the authority.
+  - `src/proxy.ts`: without the Portal's `ability_portal_session` cookie,
+    redirects to `<PORTAL_URL>/<locale>/sign-in?returnTo=<this page>`. Only an
     optimistic check.
-  - `src/lib/access.ts` (server-only): `requireProductAccess(locale)` checks
-    the session with the account service once per render, redirects
-    signed-out clients to the Portal, and returns `available`, `denied`
-    (`not_subscribed`, `locked`, or `unknown`), or `unavailable`. Every
-    protected page and data request calls it first, not only a layout; the
-    future business APIs must enforce the same checks on the server.
-  - `src/services/accountSession.ts` makes the only account service call
-    (`GET /v1/auth/session`, 5-second timeout, zod-checked response). This
-    app's product key is `crm` (`src/lib/sessionCookie.ts`). Anything
-    outside the contract counts as "unavailable", which never shows the
-    product.
-  - `src/components/`: `AccessNotice.tsx` (denied or unavailable),
-    `AccountBar.tsx` (who is signed in, with a link back to the Portal), and
-    `LocaleLinks.tsx`.
-- **Structure:** follow Amer CRM's definitions module (route-colocated
-  `hooks/`, `components/`, `schema.ts`, `types.ts`, `utils.ts`; entity API
-  operations in `src/services/`; HTTP client and configuration in `src/lib/`).
-  The `.gitkeep` folders mark that structure; they are not implemented modules.
+  - `src/lib/session.ts`, `src/lib/sessionDetails.ts`: read and validate
+    `ability_portal_session` (the Portal's sign-in `session`, `client`, and
+    `platforms`, base64url JSON) in `(app)/layout.tsx`. Display data (user,
+    role, project, safe, the client's brand); it never grants access. Without
+    `crm` in its `platforms`, the app shows "not available".
+  - The API address is the session's `platforms[crm].apiUrl`, used only when
+    `API_ALLOWED_URLS` lists it (otherwise "not set up"). `SessionProvider`
+    sets it in `src/lib/apiConfig.ts` for the HTTP client, sockets, and
+    exports; server code takes it from `readSession()`. There is no
+    build-time API address.
+  - The logo goes through `/api/branding/logo`, because `/branding` signs it
+    for 60 seconds; never cache or store that link.
+  - `src/lib/http.ts`, `src/lib/apiErrors.ts`: the only API client. It
+    classifies answers by `statusCode` and `message_code`, never by message
+    text. A 401 ends the session (back to the Portal), and 403
+    `AUTH_PASSWORD_CHANGE_REQUIRED` blocks the app until the password is
+    changed; `skipSessionRedirect` exempts calls whose 401 means something
+    else.
+  - `src/components/SessionGate.tsx`: loads the dropdowns, the permission
+    tree, and the privilege catalogue, and shows nothing if they fail.
+    `AppRouteGuard` fails closed; every new route needs a rule in
+    `src/lib/currentUserPrivileges.ts` (routes follow the tree's `href`s,
+    e.g. `/definitions/erp-codes`).
+  - The API enforces sessions and privileges on every call; the menus and
+    hidden buttons are presentation.
+- **Structure:** Amer CRM's layout (route-colocated `hooks/`, `components/`,
+  `schema.ts`, `types.ts`, `utils.ts`; entity API operations in
+  `src/services/`; HTTP client and configuration in `src/lib/`). Effects that
+  fetch on load start through `src/lib/runAfterCommit.ts`; storage handed
+  between pages is read with `src/hooks/useSessionStorageJson.ts`.
 - **Imports** use the root-based alias `"@/*": ["./*"]`, e.g.
   `@/src/i18n/routing`.
 - **Locales:** routing lives in `src/proxy.ts` (the Next.js 16 name for
   middleware) and `src/i18n/`. `src/app/[locale]/layout.tsx` is the root
   layout, and the request locale comes from `next/root-params`. English is the
   default; Arabic renders right-to-left. This app owns `messages/en.json` and
-  `messages/ar.json`.
-- **Environment** (`.env.example`): `ACCOUNT_SERVICE_URL`,
-  `ACCOUNT_SERVICE_CLIENT_ID` (`ability-crm`),
-  `ACCOUNT_SERVICE_CLIENT_SECRET`, and `PORTAL_URL`, all server-only and read
-  at runtime. Never reuse Amer CRM's API URL, cookies, or credentials.
-  Document new keys in `.env.example` with placeholder values.
+  `messages/ar.json`; `apiCodes` holds the wording for API `message_code`s.
+- **Environment** (`.env.example`): `API_ALLOWED_URLS` (the Ability CRM API
+  addresses accepted from the sign-in), `PORTAL_URL`, and
+  `MEDIA_ALLOWED_HOSTS`, all server-only and read at runtime. Never reuse
+  Amer CRM's API URL, cookies, or credentials. Document new keys in
+  `.env.example` with placeholder values.
 - **Tests:** `npm test` runs Vitest (`vitest.config.mts`) on
   `src/**/*.test.ts`; `test/server-only.ts` stands in for `server-only`. The
-  tests cover the session check against the contract (with a mocked `fetch`)
-  and the Portal URLs.
+  tests cover the envelope classification and the client's reactions, the
+  session cookie and its API address, the trusted-address check, route rules
+  and the sidebar, refund actions, ownership payloads, phone input, imports,
+  unit debt, logo addresses, and base URLs.
 
 Commands, from this directory (details in `README.md`):
 
 ```bash
 npm ci
-cp .env.example .env.local   # account service and Portal settings
+cp .env.example .env.local   # API addresses and Portal settings
 npm run dev -- --port 3100
 npm run lint
 npm run typecheck
@@ -86,7 +104,7 @@ or outdated. Keep it unchanged.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
