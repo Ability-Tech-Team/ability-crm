@@ -92,6 +92,9 @@ API calls in `src/services/`, shared UI in `src/components/`, and state in
   client shell (`AppShell`: header, sidebar, `SessionGate`).
 - `src/proxy.ts`: locale routing, and the redirect to the Portal's sign-in
   for visits without the session cookie.
+- `src/app/aws/health-check/route.ts`: `GET /aws/health-check` answers 200
+  with `{"status":200}` for the load balancer, as in Amer CRM; no locale,
+  no session, no API call.
 - `src/app/api/branding/logo/route.ts`, `src/services/branding.ts`: the
   client's logo. `GET /branding` signs its link for 60 seconds, so each
   request fetches a fresh one and redirects to it.

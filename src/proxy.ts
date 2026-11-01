@@ -36,7 +36,8 @@ export default function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Match all pathnames except those starting with `/api`, `/_next` or
-  // `/_vercel`, and those containing a dot (e.g. `favicon.ico`).
-  matcher: "/((?!api|_next|_vercel|.*\\..*).*)",
+  // Match all pathnames except those starting with `/api`, `/aws` (the
+  // health check), `/_next` or `/_vercel`, and those containing a dot (e.g.
+  // `favicon.ico`).
+  matcher: "/((?!api|aws|_next|_vercel|.*\\..*).*)",
 };
