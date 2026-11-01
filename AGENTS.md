@@ -33,7 +33,10 @@ the workspace instead of assuming it exists.
   the backend's users, roles, and privileges are the authority.
   - `src/proxy.ts`: without the Portal's `ability_portal_session` cookie,
     redirects to `<PORTAL_URL>/<locale>/sign-in?returnTo=<this page>`. Only an
-    optimistic check.
+    optimistic check. The page's address comes from `requestOrigin` in
+    `src/lib/portal.ts` (`X-Forwarded-Host` or `Host`), as in `entryUrl`;
+    `request.nextUrl` reports the server's own address, such as
+    `0.0.0.0:3000` in the container.
   - `src/lib/session.ts`, `src/lib/sessionDetails.ts`: read and validate
     `ability_portal_session` (the Portal's sign-in `session`, `client`, and
     `platforms`, base64url JSON) in `(app)/layout.tsx`. Display data (user,
@@ -76,6 +79,14 @@ the workspace instead of assuming it exists.
   `MEDIA_ALLOWED_HOSTS`, all server-only and read at runtime. Never reuse
   Amer CRM's API URL, cookies, or credentials. Document new keys in
   `.env.example` with placeholder values.
+- **Container** (README.md, Container): `Dockerfile` (the standalone server,
+  built with `NEXT_OUTPUT=standalone`; `next.config.ts` keeps the regular
+  output otherwise), `.dockerignore` (no env file enters the image), and
+  `scripts/docker.sh`, run by `npm run docker:prod:update`, `docker:prod`,
+  `docker:prod:build`, `docker:prod:logs`, and `docker:prod:stop`. The
+  container reads `.env.production` when it starts and is ready when
+  `/aws/health-check` answers. Reading the scripts doesn't authorize
+  running them; Docker isn't installed on the development Mac.
 - **Tests:** `npm test` runs Vitest (`vitest.config.mts`) on
   `src/**/*.test.ts`; `test/server-only.ts` stands in for `server-only`. The
   tests cover the envelope classification and the client's reactions, the

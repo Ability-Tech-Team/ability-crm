@@ -81,6 +81,48 @@ ignored `.env.local` and add sanitized keys to `.env.example`.
   in `src/lib/currentUserPrivileges.ts`.
 - **Logout**: `POST /auth/logout`, then the Portal's sign-in.
 
+## Container
+
+To run the app as a standalone container on a server with Docker and curl,
+from this directory:
+
+```bash
+cp .env.example .env.production   # this server's values, without quotes
+npm run docker:prod:update
+```
+
+| Command | What it does |
+| --- | --- |
+| `npm run docker:prod:update` | Builds a new image, checks it in a private preview container, then switches port 3100 to it. The running container serves until then and comes back if the new one doesn't answer. Also does the first deploy |
+| `npm run docker:prod:build` | Builds the image only |
+| `npm run docker:prod` | (Re)starts the container from the last image, e.g. after changing `.env.production` |
+| `npm run docker:prod:logs` | Follows the container's logs |
+| `npm run docker:prod:stop` | Stops and removes the container; the images stay |
+
+- **Image:** the `Dockerfile` builds the standalone server on Node.js 22
+  Alpine (`NEXT_OUTPUT=standalone`; `npm run build` keeps the regular output
+  for `next start`). It runs as the unprivileged `node` user on port 3000
+  inside the container.
+- **Settings:** the image holds no env file (`.dockerignore`). The container
+  reads `.env.production` when it starts (`docker run --env-file`), so one
+  image serves every environment. Docker reads the file literally, so write
+  values without quotes; the script refuses quoted ones.
+- **Readiness:** `GET /aws/health-check`, for the script's switch and the
+  image's `HEALTHCHECK`.
+- **Options:** `PORT` (host port, default 3100), `ENV_FILE` (default
+  `.env.production`), `IMAGE` and `NAME` (default `ability-crm`),
+  `STARTUP_TIMEOUT` (60 seconds), and `KEEP_RELEASES` (3), e.g.
+  `PORT=8080 npm run docker:prod:update`.
+- **Releases:** each image is tagged `ability-crm:<UTC time>-<commit>` and
+  `ability-crm` (the last one built or deployed); the 3 newest release tags are
+  kept. To go back by hand:
+  `docker tag ability-crm:<older tag> ability-crm && npm run docker:prod`.
+- **Network:** `docker build` downloads the npm packages (SheetJS from
+  `cdn.sheetjs.com`).
+- **Behind a load balancer or reverse proxy** that terminates HTTPS, forward
+  `Host` (or `X-Forwarded-Host`) and `X-Forwarded-Proto`. The app builds the
+  addresses it sends users back to from them.
+
 ## Structure
 
 Amer CRM's layout, kept route by route: `src/app/[locale]/(app)/<module>/`
@@ -91,7 +133,9 @@ API calls in `src/services/`, shared UI in `src/components/`, and state in
 - `src/app/[locale]/(app)/layout.tsx`: reads the session cookie, then the
   client shell (`AppShell`: header, sidebar, `SessionGate`).
 - `src/proxy.ts`: locale routing, and the redirect to the Portal's sign-in
-  for visits without the session cookie.
+  for visits without the session cookie. It returns to the page at the
+  address the browser used (`requestOrigin` in `src/lib/portal.ts`), not the
+  server's own address.
 - `src/app/aws/health-check/route.ts`: `GET /aws/health-check` answers 200
   with `{"status":200}` for the load balancer, as in Amer CRM; no locale,
   no session, no API call.
@@ -102,8 +146,11 @@ API calls in `src/services/`, shared UI in `src/components/`, and state in
 - `messages/en.json`, `messages/ar.json`: this app's catalogs. The `apiCodes`
   namespace holds the wording for `message_code`s.
 - `test/server-only.ts`: stands in for `server-only` in unit tests.
+- `Dockerfile`, `.dockerignore`, `scripts/docker.sh`: the standalone
+  container and the `docker:prod:*` scripts (see [Container](#container)).
 
 ## Repository
 
-This directory is its own local Git repository, with no remote. It shares no
-history or remote with Amer CRM or the other apps.
+This directory is its own Git repository, with its own `origin` remote on
+GitHub (`Ability-Tech-Team`). It shares no history or remote with Amer CRM or
+the other apps.

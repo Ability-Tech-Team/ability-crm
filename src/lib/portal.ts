@@ -1,5 +1,5 @@
 import { routing, type AppLocale } from "@/src/i18n/routing";
-import { parseBaseUrl } from "./baseUrl";
+import { isLoopbackHost, parseBaseUrl } from "./baseUrl";
 
 let reportedProblem = "";
 
@@ -49,6 +49,35 @@ export function buildPortalHomeUrl(
   locale: string,
 ): string {
   return `${portalBaseUrl}/${locale}`;
+}
+
+/**
+ * The origin the browser used for this request: `X-Forwarded-Host` (set by a
+ * proxy in front of the app) or `Host`, never the server's own listening
+ * address, which `request.nextUrl` reports (`0.0.0.0:3000` in the container).
+ * The protocol is `X-Forwarded-Proto`'s, or `http` only on loopback hosts.
+ * The Portal checks `returnTo` against its configured product addresses, so
+ * a forged header only makes it ignore the address.
+ */
+export function requestOrigin(requestHeaders: Headers): string {
+  const host =
+    firstHeaderValue(requestHeaders, "x-forwarded-host") ||
+    firstHeaderValue(requestHeaders, "host") ||
+    "localhost";
+  const forwardedProto = firstHeaderValue(requestHeaders, "x-forwarded-proto");
+  const protocol =
+    forwardedProto === "http" || forwardedProto === "https"
+      ? forwardedProto
+      : isLoopbackHost(host.replace(/:\d+$/, ""))
+        ? "http"
+        : "https";
+
+  return `${protocol}://${host}`;
+}
+
+/** A header's first value, as proxies append theirs after a comma. */
+function firstHeaderValue(requestHeaders: Headers, name: string): string {
+  return requestHeaders.get(name)?.split(",")[0]?.trim() ?? "";
 }
 
 /** The locale of a path such as `/ar/...`, or the default locale. */

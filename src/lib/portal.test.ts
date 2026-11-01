@@ -5,6 +5,7 @@ import {
   buildPortalSignInUrl,
   getPortalBaseUrl,
   localeFromPathname,
+  requestOrigin,
 } from "./portal";
 
 afterEach(() => {
@@ -55,6 +56,44 @@ describe("localeFromPathname", () => {
     ["/arabic", "en"],
   ])("reads %j as %j", (pathname, locale) => {
     expect(localeFromPathname(pathname)).toBe(locale);
+  });
+});
+
+describe("requestOrigin", () => {
+  const origin = (headers: Record<string, string>) =>
+    requestOrigin(new Headers(headers));
+
+  it("uses the Host the browser sent, not the server's own address", () => {
+    expect(origin({ host: "localhost:3100" })).toBe("http://localhost:3100");
+    expect(origin({ host: "apps.example.com" })).toBe(
+      "https://apps.example.com",
+    );
+    expect(origin({ host: "172.20.1.141:3100" })).toBe(
+      "https://172.20.1.141:3100",
+    );
+  });
+
+  it("prefers the first forwarded host and protocol", () => {
+    expect(
+      origin({
+        host: "0.0.0.0:3000",
+        "x-forwarded-host": "apps.example.com, internal:3000",
+        "x-forwarded-proto": "https, http",
+      }),
+    ).toBe("https://apps.example.com");
+    expect(
+      origin({ host: "172.20.1.141:3100", "x-forwarded-proto": "http" }),
+    ).toBe("http://172.20.1.141:3100");
+  });
+
+  it("ignores an empty forwarded host and an unknown protocol", () => {
+    expect(
+      origin({
+        host: "localhost:3100",
+        "x-forwarded-host": "",
+        "x-forwarded-proto": "ftp",
+      }),
+    ).toBe("http://localhost:3100");
   });
 });
 

@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "docker:prod:build": "bash scripts/docker.sh build",
+    "docker:prod": "bash scripts/docker.sh start",
+    "docker:prod:update": "bash scripts/docker.sh update",
+    "docker:prod:logs": "bash scripts/docker.sh logs",
+    "docker:prod:stop": "bash scripts/docker.sh stop"
   },
   "dependencies": {
     "axios": "^1.21.0",

@@ -5,6 +5,7 @@ import {
   buildPortalSignInUrl,
   getPortalBaseUrl,
   localeFromPathname,
+  requestOrigin,
 } from "./lib/portal";
 import { SESSION_DETAILS_COOKIE } from "./lib/sessionDetails";
 
@@ -26,7 +27,7 @@ export default function proxy(request: NextRequest) {
         buildPortalSignInUrl(
           portalBaseUrl,
           localeFromPathname(request.nextUrl.pathname),
-          request.nextUrl.href,
+          `${requestOrigin(request.headers)}${request.nextUrl.pathname}${request.nextUrl.search}`,
         ),
       );
     }

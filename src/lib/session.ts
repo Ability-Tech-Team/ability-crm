@@ -1,6 +1,7 @@
 import 'server-only';
 import { cookies, headers } from 'next/headers';
-import { isLoopbackHost, matchAllowedBaseUrl } from './baseUrl';
+import { matchAllowedBaseUrl } from './baseUrl';
+import { requestOrigin } from './portal';
 import {
   parseSessionCookie,
   SESSION_DETAILS_COOKIE,
@@ -49,21 +50,5 @@ export async function readSession(): Promise<Session | null> {
  * returning there.
  */
 export async function entryUrl(locale: string): Promise<string> {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get('x-forwarded-host')?.split(',')[0]?.trim() ??
-    requestHeaders.get('host') ??
-    'localhost';
-  const forwardedProto = requestHeaders
-    .get('x-forwarded-proto')
-    ?.split(',')[0]
-    ?.trim();
-  const protocol =
-    forwardedProto === 'http' || forwardedProto === 'https'
-      ? forwardedProto
-      : isLoopbackHost(host.replace(/:\d+$/, ''))
-        ? 'http'
-        : 'https';
-
-  return `${protocol}://${host}/${locale}`;
+  return `${requestOrigin(await headers())}/${locale}`;
 }

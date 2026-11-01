@@ -1,0 +1,18 @@
+# Rebuilt inside the image
+node_modules
+.next
+*.tsbuildinfo
+next-env.d.ts
+
+# Settings come from the env file at runtime, never from the image
+.env*
+
+.git
+.gitignore
+.DS_Store
+npm-debug.log*
+coverage
+Dockerfile
+.dockerignore
+scripts
+*.md
