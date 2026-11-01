@@ -23,12 +23,12 @@ From `CRM/`:
 ```bash
 npm --prefix Ability-CRM ci
 cp Ability-CRM/.env.example Ability-CRM/.env.local   # then list the API address
-npm --prefix Ability-CRM run dev -- --port 3100
+npm --prefix Ability-CRM run dev
 ```
 
-Or from this directory: `npm ci`, then `npm run dev -- --port 3100`.
-Open <http://localhost:3100>. Without the Portal's `ability_portal_session`
-cookie you are sent to the Portal's sign-in page (port 3300) and brought back
+Or from this directory: `npm ci`, then `npm run dev`.
+Open <http://localhost:9994>. Without the Portal's `ability_portal_session`
+cookie you are sent to the Portal's sign-in page (port 9992) and brought back
 afterwards. `/` opens the dashboard; `/ar` renders right-to-left.
 
 | Task | Command (from this directory) |
@@ -37,14 +37,14 @@ afterwards. `/` opens the dashboard; `/ar` renders right-to-left.
 | Type check (`tsc --noEmit`) | `npm run typecheck` |
 | Unit tests (Vitest) | `npm test` |
 | Production build | `npm run build` |
-| Production server | `npm run start -- --port 3100` |
+| Production server | `npm run start` |
 
 ## Environment
 
 | Variable | Local value | Purpose |
 | --- | --- | --- |
 | `API_ALLOWED_URLS` | the dev CRM API (`.env.local`) | The Ability CRM API addresses this app accepts from the sign-in (`platforms[crm].apiUrl`), comma-separated. An unlisted address is never called. `https:`, or `http:` for loopback and private-network hosts |
-| `PORTAL_URL` | `http://localhost:3300` | Where users sign in |
+| `PORTAL_URL` | `http://localhost:9992` | Where users sign in |
 | `MEDIA_ALLOWED_HOSTS` | empty | Extra `https` hosts the media proxy may fetch private files from |
 
 All three are server-only and read at runtime, so one build serves every
@@ -93,7 +93,7 @@ npm run docker:prod:update
 
 | Command | What it does |
 | --- | --- |
-| `npm run docker:prod:update` | Builds a new image, checks it in a private preview container, then switches port 3100 to it. The running container serves until then and comes back if the new one doesn't answer. Also does the first deploy |
+| `npm run docker:prod:update` | Builds a new image, checks it in a private preview container, then switches port 9994 to it. The running container serves until then and comes back if the new one doesn't answer. Also does the first deploy |
 | `npm run docker:prod:build` | Builds the image only |
 | `npm run docker:prod` | (Re)starts the container from the last image, e.g. after changing `.env.production` |
 | `npm run docker:prod:logs` | Follows the container's logs |
@@ -109,7 +109,7 @@ npm run docker:prod:update
   values without quotes; the script refuses quoted ones.
 - **Readiness:** `GET /aws/health-check`, for the script's switch and the
   image's `HEALTHCHECK`.
-- **Options:** `PORT` (host port, default 3100), `ENV_FILE` (default
+- **Options:** `PORT` (host port, default 9994), `ENV_FILE` (default
   `.env.production`), `IMAGE` and `NAME` (default `ability-crm`),
   `STARTUP_TIMEOUT` (60 seconds), and `KEEP_RELEASES` (3), e.g.
   `PORT=8080 npm run docker:prod:update`.

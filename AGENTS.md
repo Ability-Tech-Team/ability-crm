@@ -9,7 +9,7 @@ standalone clone without the parent folder, get the canonical `AGENTS.md` from
 the workspace instead of assuming it exists.
 
 - **Target:** a chat started in this directory targets Ability CRM, the
-  commercial CRM product (npm package `ability-crm`, local port 3100). Ability
+  commercial CRM product (npm package `ability-crm`, local port 9994). Ability
   CRM is also the workspace's default target for feature requests. Do not
   change sibling apps unless the request names them; a CRM change does not
   require a matching Community Admin change.
@@ -99,12 +99,12 @@ Commands, from this directory (details in `README.md`):
 ```bash
 npm ci
 cp .env.example .env.local   # API addresses and Portal settings
-npm run dev -- --port 3100
+npm run dev
 npm run lint
 npm run typecheck
 npm test
 npm run build
-npm run start -- --port 3100
+npm run start
 ```
 
 State, decisions, and the Ability CRM tracker: `../docs/MIGRATION.md`.

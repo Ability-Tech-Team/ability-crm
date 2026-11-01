@@ -20,7 +20,7 @@ cd "$(dirname "$0")/.."
 
 IMAGE=${IMAGE:-ability-crm}
 NAME=${NAME:-ability-crm}
-PORT=${PORT:-3100}
+PORT=${PORT:-9994}
 ENV_FILE=${ENV_FILE:-.env.production}
 HEALTH_PATH=/aws/health-check
 STARTUP_TIMEOUT=${STARTUP_TIMEOUT:-60}
