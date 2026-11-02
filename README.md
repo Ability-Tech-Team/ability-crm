@@ -55,7 +55,7 @@ ignored `.env.local` and add sanitized keys to `.env.example`.
 
 ## Sign-in and session
 
-- **The Portal signs users in** (portal backend, `POST /api/auth/login`). The
+- **The Portal signs users in** (portal backend, `POST /portal/auth/login`). The
   backend sets the HttpOnly `access_token` cookie; the API checks it on every
   call.
 - **`ability_portal_session`**: the Portal also stores the sign-in answer's
