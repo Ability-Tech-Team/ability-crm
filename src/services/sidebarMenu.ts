@@ -8,11 +8,12 @@ export async function getCurrentUserPrivileges(signal?: AbortSignal) {
   // admin at any time, and a stale cached response would leave the UI
   // showing buttons the user no longer has access to until the cache
   // expires (reproduced as "works in incognito, fails in normal window").
+  // The headers do it: the API rejects unknown query parameters
+  // (INVALID_DATA_PROVIDED), so a `_ts` cache-buster can't be sent.
   const response = await api.get<RolePrivilegesResponse>(
     ROLE_PRIVILEGES_ENDPOINT,
     {
       signal,
-      params: { _ts: Date.now() },
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         Pragma: 'no-cache',

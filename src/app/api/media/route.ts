@@ -88,7 +88,9 @@ async function authenticateRequest(
 ): Promise<boolean> {
   try {
     const response = await fetch(
-      `${apiBaseUrl}/roles/get-role-privileges?_ts=${Date.now()}`,
+      // No `_ts`: the API rejects unknown query parameters, and
+      // `cache: 'no-store'` already skips every cache.
+      `${apiBaseUrl}/roles/get-role-privileges`,
       {
         headers: {
           Authorization: authorization,
