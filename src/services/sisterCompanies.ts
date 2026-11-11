@@ -23,7 +23,7 @@ export interface UpdateSisterCompanyDto {
 export async function createSisterCompany(
   payload: CreateSisterCompanyDto,
 ): Promise<void> {
-  await api.post('/definitions/create-sister-companies', {
+  await api.post('/definitions/sister-companies', {
     sister_companies: [payload],
   });
 }
@@ -32,11 +32,11 @@ export async function updateSisterCompany(
   id: number,
   payload: UpdateSisterCompanyDto,
 ): Promise<void> {
-  await api.post(`/definitions/update-sister-company/${id}`, payload);
+  await api.post(`/definitions/sister-companies/update/${id}`, payload);
 }
 
 export async function deleteSisterCompany(id: number): Promise<void> {
-  await api.post(`/definitions/update-sister-company/${id}`, {
+  await api.post(`/definitions/sister-companies/update/${id}`, {
     is_deleted: 1,
   });
 }

@@ -174,7 +174,7 @@ export async function updateCustomer(
   customerId: number,
   body: UpdateCustomerDto,
 ): Promise<void> {
-  await api.post(`/customers/update-customer/${customerId}`, body);
+  await api.post(`/customers/update/${customerId}`, body);
 }
 
 /**

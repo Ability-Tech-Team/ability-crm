@@ -23,7 +23,7 @@ export interface UpdateLocationTypeDto {
 export async function createLocationType(
   payload: CreateLocationTypeDto,
 ): Promise<void> {
-  await api.post('/definitions/create-location-types', {
+  await api.post('/definitions/location-types', {
     location_types: [payload],
   });
 }
@@ -32,11 +32,11 @@ export async function updateLocationType(
   id: number,
   payload: UpdateLocationTypeDto,
 ): Promise<void> {
-  await api.post(`/definitions/update-location-type/${id}`, payload);
+  await api.post(`/definitions/location-types/update/${id}`, payload);
 }
 
 export async function deleteLocationType(id: number): Promise<void> {
-  await api.post(`/definitions/update-location-type/${id}`, {
+  await api.post(`/definitions/location-types/update/${id}`, {
     is_deleted: 1,
   });
 }

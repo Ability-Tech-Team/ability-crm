@@ -177,7 +177,7 @@ export async function getEndOfDayDepartmentsReport(
   signal?: AbortSignal,
 ): Promise<EodResult> {
   const response = await api.get<EodReportResponse>(
-    '/invoices/reports/end-day/departments',
+    '/orders/invoices/reports/end-day/departments',
     {
       params: {
         from_date: params.from_date,
@@ -220,7 +220,7 @@ export async function getDepartmentServicesReport(
   signal?: AbortSignal,
 ): Promise<DepartmentServicesReportResult> {
   const response = await api.get<DepartmentServicesResponse>(
-    '/invoices/reports/end-day/department-services',
+    '/orders/invoices/reports/end-day/department-services',
     {
       params: {
         from_date: params.from_date,
@@ -271,7 +271,7 @@ export async function getDailyInvoicesReport(
   signal?: AbortSignal,
 ): Promise<DailyInvoiceRow[]> {
   const response = await api.get<DailyInvoicesResponse>(
-    '/invoices/reports/daily/detailed',
+    '/orders/invoices/reports/daily/detailed',
     {
       params: {
         from_date: params.from_date,

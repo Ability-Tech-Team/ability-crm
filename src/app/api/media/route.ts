@@ -88,7 +88,7 @@ async function authenticateRequest(
 ): Promise<boolean> {
   try {
     const response = await fetch(
-      `${apiBaseUrl}/get-role-privileges?_ts=${Date.now()}`,
+      `${apiBaseUrl}/roles/get-role-privileges?_ts=${Date.now()}`,
       {
         headers: {
           Authorization: authorization,

@@ -99,7 +99,7 @@ export async function getServices(
   params: GetServicesParams = {},
   signal?: AbortSignal,
 ): Promise<GetServicesResponse> {
-  const response = await api.get<GetServicesRaw>('/services', {
+  const response = await api.get<GetServicesRaw>('/definitions/services', {
     params: {
       ...(params.service_id ? { service_id: params.service_id } : {}),
       ...(params.service_name ? { service_name: params.service_name } : {}),
@@ -155,12 +155,12 @@ export async function getServiceById(
 }
 
 export async function createService(payload: CreateServiceDto): Promise<void> {
-  await api.post('/service', payload);
+  await api.post('/definitions/service', payload);
 }
 
 export async function updateService(
   serviceId: number,
   payload: UpdateServiceDto,
 ): Promise<void> {
-  await api.post(`/services/update/${serviceId}`, payload);
+  await api.post(`/definitions/services/update/${serviceId}`, payload);
 }

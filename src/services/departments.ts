@@ -25,7 +25,7 @@ export interface UpdateDepartmentDto {
 export async function createDepartment(
   payload: CreateDepartmentDto,
 ): Promise<void> {
-  await api.post('/definitions/department', {
+  await api.post('/definitions/departments', {
     departments: [payload],
   });
 }
@@ -34,11 +34,11 @@ export async function updateDepartment(
   departmentId: number,
   payload: UpdateDepartmentDto,
 ): Promise<void> {
-  await api.post(`/definitions/department/update/${departmentId}`, payload);
+  await api.post(`/definitions/departments/update/${departmentId}`, payload);
 }
 
 export async function deleteDepartment(departmentId: number): Promise<void> {
-  await api.post(`/definitions/department/update/${departmentId}`, {
+  await api.post(`/definitions/departments/update/${departmentId}`, {
     is_deleted: 1,
   });
 }

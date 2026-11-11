@@ -1,7 +1,7 @@
 import api from '@/src/lib/http';
 import type { RolePrivilegesResponse } from '@/src/types/rolePrivileges';
 
-const ROLE_PRIVILEGES_ENDPOINT = '/get-role-privileges';
+const ROLE_PRIVILEGES_ENDPOINT = '/roles/get-role-privileges';
 
 export async function getCurrentUserPrivileges(signal?: AbortSignal) {
   // Always bypass any HTTP / proxy cache. Privileges can be revoked by an

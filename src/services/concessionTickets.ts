@@ -5,7 +5,7 @@ import type { TicketComment } from '@/src/services/tickets';
  * Backend contract for the تنازلات-only ticket module.
  *
  * The backend should expose these routes under `/orders/concession-tickets`
- * and include `concession_ticket_reasons` in `/all-dropdowns`.
+ * and include `concession_ticket_reasons` in `/definitions/all-dropdowns`.
  */
 const CONCESSION_TICKETS_ENDPOINT = '/orders/concession-tickets';
 

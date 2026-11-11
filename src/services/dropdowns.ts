@@ -1,7 +1,7 @@
 import api from '@/src/lib/http';
 import type { AllDropdownsResponse } from '@/src/types/dropdowns';
 
-const DROPDOWNS_ENDPOINT = '/all-dropdowns';
+const DROPDOWNS_ENDPOINT = '/definitions/all-dropdowns';
 
 type DropdownItem = Record<string, unknown>;
 

@@ -111,7 +111,7 @@ export async function getEmployees(
   params: GetEmployeesParams = {},
   signal?: AbortSignal,
 ): Promise<GetEmployeesResponse> {
-  const response = await api.get<GetEmployeesRaw>('/get-employees', {
+  const response = await api.get<GetEmployeesRaw>('/employees', {
     params: {
       ...(params.name ? { name: params.name } : {}),
       ...(params.role_id ? { role_id: params.role_id } : {}),
@@ -143,7 +143,7 @@ export async function createEmployee(
   payload: CreateEmployeeDto,
 ): Promise<{ success: boolean }> {
   const response = await api.post<EmployeeMutationResponse>(
-    '/employee/create',
+    '/employees',
     payload,
   );
   assertMutationSuccess(response.data, 'Failed to create employee');
@@ -155,7 +155,7 @@ export async function updateEmployee(
   payload: UpdateEmployeeDto,
 ): Promise<{ success: boolean }> {
   const response = await api.post<EmployeeMutationResponse>(
-    `/employee/update/${employeeId}`,
+    `/employees/update/${employeeId}`,
     payload,
   );
   assertMutationSuccess(response.data, 'Failed to update employee');
@@ -166,7 +166,7 @@ export async function sendPasswordResetMail(
   employeeId: string,
 ): Promise<{ success: boolean }> {
   const response = await api.post<EmployeeMutationResponse>(
-    `/employee/reset-password/${employeeId}`,
+    `/auth/reset-password/${employeeId}`,
   );
   assertMutationSuccess(response.data, 'Failed to send password reset email');
   return { success: response.data?.success !== false };

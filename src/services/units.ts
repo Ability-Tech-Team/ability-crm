@@ -242,7 +242,7 @@ export async function updateUnit(
   unitId: number,
   payload: UpdateUnitPayload,
 ): Promise<void> {
-  await api.post(`/projects/units/update-unit/${unitId}`, payload);
+  await api.post(`/projects/units/update/${unitId}`, payload);
 }
 
 // ─── Ownership History ──────────────────────────────────────

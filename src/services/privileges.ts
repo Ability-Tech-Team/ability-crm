@@ -49,7 +49,7 @@ export interface CreateRoleResponse {
  * Fetches the hierarchical menu structure with menu items and their specific privileges
  */
 export async function getPrivileges(): Promise<PrivilegesResponse> {
-  const response = await axios.get<PrivilegesResponse>('/get-privileges');
+  const response = await axios.get<PrivilegesResponse>('/definitions/privileges');
   return response.data;
 }
 
@@ -93,7 +93,7 @@ export async function createRole(
   payload: CreateRoleDto,
 ): Promise<CreateRoleResponse> {
   const response = await axios.post<CreateRoleResponse>(
-    '/create-role',
+    '/roles',
     payload,
   );
 

@@ -29,7 +29,7 @@ export interface UpdateLocationDto {
 export async function createLocation(
   payload: CreateLocationDto,
 ): Promise<void> {
-  await api.post('/definitions/create-locations', {
+  await api.post('/definitions/locations', {
     locations: [payload],
   });
 }
@@ -38,11 +38,11 @@ export async function updateLocation(
   id: number,
   payload: UpdateLocationDto,
 ): Promise<void> {
-  await api.post(`/definitions/update-location/${id}`, payload);
+  await api.post(`/definitions/locations/update/${id}`, payload);
 }
 
 export async function deleteLocation(id: number): Promise<void> {
-  await api.post(`/definitions/update-location/${id}`, {
+  await api.post(`/definitions/locations/update/${id}`, {
     is_deleted: 1,
   });
 }

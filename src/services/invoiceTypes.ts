@@ -36,7 +36,7 @@ export interface UpdateInvoiceTypeDto {
 export async function createInvoiceType(
   payload: CreateInvoiceTypeDto,
 ): Promise<void> {
-  await api.post('/definitions/create-invoice-types', {
+  await api.post('/definitions/invoice-types', {
     invoice_types: [payload],
   });
 }
@@ -45,11 +45,11 @@ export async function updateInvoiceType(
   id: number,
   payload: UpdateInvoiceTypeDto,
 ): Promise<void> {
-  await api.post(`/definitions/update-invoice-type/${id}`, payload);
+  await api.post(`/definitions/invoice-types/update/${id}`, payload);
 }
 
 export async function deleteInvoiceType(id: number): Promise<void> {
-  await api.post(`/definitions/update-invoice-type/${id}`, {
+  await api.post(`/definitions/invoice-types/update/${id}`, {
     is_deleted: 1,
   });
 }

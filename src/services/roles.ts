@@ -35,7 +35,7 @@ export async function getRoles(
   params: GetRolesParams = {},
   signal?: AbortSignal,
 ): Promise<GetRolesResponse> {
-  const response = await api.get<GetRolesRaw>('/get-roles', {
+  const response = await api.get<GetRolesRaw>('/roles', {
     params: {
       ...(params.role_name ? { role_name: params.role_name } : {}),
       page: params.page ?? 1,
@@ -66,7 +66,7 @@ export async function getRolePrivilegesById(
   signal?: AbortSignal,
 ): Promise<RolePrivilegesResponse> {
   const response = await api.get<RolePrivilegesResponse>(
-    '/get-role-privileges',
+    '/roles/get-role-privileges',
     { params: { role_id: roleId }, signal },
   );
 
@@ -79,11 +79,11 @@ export async function updateRole(
   roleId: string,
   payload: CreateRoleDto,
 ): Promise<void> {
-  await api.post(`/role/update/${roleId}`, payload);
+  await api.post(`/roles/update/${roleId}`, payload);
 }
 
 // ─── Delete role (soft-delete via update endpoint) ───────────────
 
 export async function deleteRole(roleId: string): Promise<void> {
-  await api.post(`/role/update/${roleId}`, { is_deleted: 1 });
+  await api.post(`/roles/update/${roleId}`, { is_deleted: 1 });
 }

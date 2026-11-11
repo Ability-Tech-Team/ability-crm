@@ -259,7 +259,7 @@ export async function createTicket(
   payload: CreateTicketDto,
 ): Promise<CreateTicketResult> {
   const { contact_channel_id, ...ticketPayload } = payload;
-  const response = await api.post('/orders/tickets/create', {
+  const response = await api.post('/orders/tickets', {
     ...ticketPayload,
     ...getContactChannelPayload(contact_channel_id),
   });

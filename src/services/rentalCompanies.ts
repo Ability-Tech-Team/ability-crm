@@ -258,7 +258,7 @@ export async function createRentalCompany(
   payload: CreateRentalCompanyDto,
 ): Promise<void> {
   await postRentalCompanyPayload(
-    '/definitions/create-rental-companies-with-attachments',
+    '/definitions/rental-companies',
     payload,
     true,
   );
@@ -269,13 +269,13 @@ export async function updateRentalCompany(
   payload: UpdateRentalCompanyDto,
 ): Promise<void> {
   await postRentalCompanyPayload(
-    `/definitions/update-rental-companies/${id}`,
+    `/definitions/rental-companies/update/${id}`,
     payload,
   );
 }
 
 export async function deleteRentalCompany(id: number): Promise<void> {
-  await api.post(`/definitions/update-rental-companies/${id}`, {
+  await api.post(`/definitions/rental-companies/update/${id}`, {
     is_deleted: 1,
   });
 }
