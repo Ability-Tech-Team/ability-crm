@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ArrowLeft,
   Bell,
   User,
   Menu,
@@ -19,6 +20,7 @@ import HeaderSearch from './HeaderSearch';
 import ChangePasswordModal from './ChangePasswordModal';
 import { useState, useRef, useEffect } from 'react';
 import { logoutAndClearSession } from '@/src/lib/logout';
+import { buildPortalHomeUrl } from '@/src/lib/portal';
 
 interface Notification {
   id: string;
@@ -28,11 +30,18 @@ interface Notification {
 
 export default function Header() {
   const { isCollapsed, toggle } = useSidebarStore();
-  const { userName, roleName, projectName } = useSession().details;
+  const { details, portalBaseUrl } = useSession();
+  const { userName, roleName, projectName } = details;
   const t = useTranslations('common');
   const tAuth = useTranslations('auth');
+  const tSession = useTranslations('session');
   const locale = useLocale();
   const isRtl = getLocaleDirection(locale as AppLocale) === 'rtl';
+  // The Portal's product cards, in the same language. Hidden when
+  // PORTAL_URL isn't configured.
+  const portalHomeUrl = portalBaseUrl
+    ? buildPortalHomeUrl(portalBaseUrl, locale)
+    : null;
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications] = useState<Notification[]>([]);
@@ -165,6 +174,23 @@ export default function Header() {
             </div>
           )}
         </div>
+
+        {portalHomeUrl ? (
+          <a
+            href={portalHomeUrl}
+            title={tSession('backToPortal')}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-2 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-sky-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 lg:px-3"
+          >
+            <ArrowLeft
+              size={18}
+              aria-hidden="true"
+              className="shrink-0 text-[#8F9BB3] rtl:rotate-180"
+            />
+            <span className="sr-only lg:not-sr-only lg:whitespace-nowrap">
+              {tSession('backToPortal')}
+            </span>
+          </a>
+        ) : null}
 
         <LanguageSwitcherCompact />
 
