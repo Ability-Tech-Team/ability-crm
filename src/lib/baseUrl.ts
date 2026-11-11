@@ -114,10 +114,21 @@ export function matchAllowedBaseUrl(
     return null;
   }
 
-  const allowed = (allowedList ?? "")
+  return parseAllowedBaseUrls(allowedList, options).includes(parsed.baseUrl)
+    ? parsed.baseUrl
+    : null;
+}
+
+/**
+ * The comma-separated base URLs in `allowedList`, normalized, in order;
+ * invalid entries are left out.
+ */
+export function parseAllowedBaseUrls(
+  allowedList: string | undefined,
+  options: ParseBaseUrlOptions = {},
+): string[] {
+  return (allowedList ?? "")
     .split(",")
     .map((entry) => parseBaseUrl(entry, options))
     .flatMap((entry) => (entry.status === "configured" ? [entry.baseUrl] : []));
-
-  return allowed.includes(parsed.baseUrl) ? parsed.baseUrl : null;
 }

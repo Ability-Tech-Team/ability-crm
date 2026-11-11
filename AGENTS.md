@@ -22,9 +22,10 @@ the workspace instead of assuming it exists.
   `development` branch and adapted to the Ability CRM backend
   (`../docs/ABILITY-CRM-BACKEND-CHANGES.md`): SAP removed, ERP account codes,
   `customer_id` on tickets, complaints, invoices, CTS, and documents, uploaded
-  unit debt, ownership end and edit, and the new Imports screens. The dev API
-  accepts the Portal's cookie but lacks the startup routes and CORS, so the
-  screens were checked against a contract stand-in only (`../docs/MIGRATION.md`). Not ported: the public
+  unit debt, ownership end and edit, and the new Imports screens. Since
+  2026-11-11 it follows the API's renamed routes and works on the published
+  app and locally against the development server
+  (`api-prd.ability-tech.com`, despite its name; `../docs/MIGRATION.md`). Not ported: the public
   rental-request pages, Amer's legal templates, and the walk-in request edit
   (its route was removed). Do not add a stub, bypass, or demo mode to the app.
 - **Sign-in and session** (decided 2026-10-29; rules in `../AGENTS.md`): users
@@ -47,6 +48,12 @@ the workspace instead of assuming it exists.
     sets it in `src/lib/apiConfig.ts` for the HTTP client, sockets, and
     exports; server code takes it from `readSession()`. There is no
     build-time API address.
+  - **Local development** (`src/lib/devApiProxy.ts`): under `next dev` the
+    browser calls `/api/dev-proxy/crm/<n>`, which `next.config.ts` forwards
+    to the n-th `API_ALLOWED_URLS` address (same-origin requests only), so
+    the backend's cookie lands on `localhost` and no CORS entry is needed.
+    The layout passes `browserApiBaseUrl(...)` for HTTP calls and the API's
+    own origin for sockets (`setApiAddresses`). Builds have no rewrites.
   - The logo goes through `/api/branding/logo`, because `/branding` signs it
     for 60 seconds; never cache or store that link.
   - `src/lib/http.ts`, `src/lib/apiErrors.ts`: the only API client. It

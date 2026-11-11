@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import AccessNotice from '@/src/components/AccessNotice';
 import AppShell from '@/src/components/AppShell';
 import SessionProvider from '@/src/components/SessionProvider';
+import { browserApiBaseUrl } from '@/src/lib/devApiProxy';
 import { buildPortalHomeUrl, buildPortalSignInUrl, getPortalBaseUrl } from '@/src/lib/portal';
 import { entryUrl, readSession } from '@/src/lib/session';
 import { includesCrmPlatform } from '@/src/lib/sessionDetails';
@@ -73,7 +74,14 @@ export default async function AppLayout({ children, params }: Props) {
   }
 
   return (
-    <SessionProvider value={{ details, apiBaseUrl, portalBaseUrl }}>
+    <SessionProvider
+      value={{
+        details,
+        apiBaseUrl: browserApiBaseUrl(apiBaseUrl, process.env.API_ALLOWED_URLS),
+        socketOrigin: new URL(apiBaseUrl).origin,
+        portalBaseUrl,
+      }}
+    >
       <AppShell>{children}</AppShell>
     </SessionProvider>
   );

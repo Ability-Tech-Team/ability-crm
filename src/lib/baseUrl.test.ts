@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { matchAllowedBaseUrl, parseBaseUrl } from './baseUrl';
+import {
+  matchAllowedBaseUrl,
+  parseAllowedBaseUrls,
+  parseBaseUrl,
+} from './baseUrl';
 
 describe('parseBaseUrl', () => {
   it('needs https for a non-loopback host by default', () => {
@@ -54,5 +58,21 @@ describe('matchAllowedBaseUrl', () => {
     expect(matchAllowedBaseUrl('http://172.20.1.141:9999', allowed)).toBeNull();
     expect(matchAllowedBaseUrl(null, allowed, options)).toBeNull();
     expect(matchAllowedBaseUrl('http://172.20.1.141:9999', undefined, options)).toBeNull();
+  });
+});
+
+describe('parseAllowedBaseUrls', () => {
+  it('normalizes the list in order and leaves out invalid entries', () => {
+    expect(
+      parseAllowedBaseUrls(
+        ' https://api.example.com/crm/ , not a url,http://172.20.1.141:9999/crm,http://8.8.8.8',
+        { allowPrivateNetworkHttp: true },
+      ),
+    ).toEqual(['https://api.example.com/crm', 'http://172.20.1.141:9999/crm']);
+  });
+
+  it('is empty without a list', () => {
+    expect(parseAllowedBaseUrls(undefined)).toEqual([]);
+    expect(parseAllowedBaseUrls('')).toEqual([]);
   });
 });

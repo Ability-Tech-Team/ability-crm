@@ -22,12 +22,13 @@ From `CRM/`:
 
 ```bash
 npm --prefix Ability-CRM ci
-cp Ability-CRM/.env.example Ability-CRM/.env.local   # then list the API address
+cp Ability-CRM/.env.example Ability-CRM/.env.local   # lists the dev server's API
 npm --prefix Ability-CRM run dev
 ```
 
 Or from this directory: `npm ci`, then `npm run dev`.
-Open <http://localhost:9994>. Without the Portal's `ability_portal_session`
+To sign in, the Portal must run too: `npm run dev` from `CRM/` starts all
+three apps. Open <http://localhost:9994>. Without the Portal's `ability_portal_session`
 cookie you are sent to the Portal's sign-in page (port 9992) and brought back
 afterwards. `/` opens the dashboard; `/ar` renders right-to-left.
 
@@ -39,17 +40,35 @@ afterwards. `/` opens the dashboard; `/ar` renders right-to-left.
 | Production build | `npm run build` |
 | Production server | `npm run start` |
 
+### Local API proxy (`npm run dev` only)
+
+- **Why:** the API's CORS lists only the deployed apps, and its `access_token`
+  cookie (`SameSite=Lax`, on the API's host) never reaches a page on
+  `localhost`.
+- **How:** during `next dev`, the browser calls this app's own
+  `/api/dev-proxy/crm/<n>` (the n-th address in `API_ALLOWED_URLS`), and `next.config.ts` forwards each call
+  (`src/lib/devApiProxy.ts`). The backend's `access_token` cookie is then
+  stored for `localhost`, where the Portal, Ability CRM, and Community Admin
+  all receive it, so local runs need no CORS entry.
+- **Same-origin only:** a request from another site (by `Sec-Fetch-Site`)
+  doesn't match the rewrite and gets a 404.
+- **Builds:** `next build` and the container have no rewrites; deployed, the
+  browser calls the backend directly. Socket.IO still connects to the API itself; the proxy forwards HTTP
+  calls only.
+- **Browsers:** checked in Edge. Safari may refuse the backend's `Secure`
+  cookie on `http://localhost`; use Chrome, Edge, or Firefox.
+
 ## Environment
 
 | Variable | Local value | Purpose |
 | --- | --- | --- |
-| `API_ALLOWED_URLS` | the dev CRM API (`.env.local`) | The Ability CRM API addresses this app accepts from the sign-in (`platforms[crm].apiUrl`), comma-separated. An unlisted address is never called. `https:`, or `http:` for loopback and private-network hosts |
+| `API_ALLOWED_URLS` | `https://api-prd.ability-tech.com/crm` (the dev server) | The Ability CRM API addresses this app accepts from the sign-in (`platforms[crm].apiUrl`), comma-separated. An unlisted address is never called. `https:`, or `http:` for loopback and private-network hosts |
 | `PORTAL_URL` | `http://localhost:9992` | Where users sign in |
 | `MEDIA_ALLOWED_HOSTS` | empty | Extra `https` hosts the media proxy may fetch private files from |
 
 All three are server-only and read at runtime, so one build serves every
-environment. The API must list this app's origin in its
-`CORS_ALLOWED_ORIGINS`. This app
+environment. Deployed, the API must list this app's origin in its
+`CORS_ALLOWED_ORIGINS`; local runs use the proxy. This app
 never uses Amer CRM's API URL, cookies, or secrets. Keep real values in the
 ignored `.env.local` and add sanitized keys to `.env.example`.
 

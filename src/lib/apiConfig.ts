@@ -5,16 +5,26 @@
  * shell makes its first request. Never Amer CRM's API.
  */
 let apiBaseUrl: string | null = null;
+let socketOrigin: string | null = null;
 
-export function setApiBaseUrl(baseUrl: string): void {
-  apiBaseUrl = baseUrl;
+export function setApiAddresses(addresses: {
+  /** Where API calls go; during `next dev`, the proxy path (src/lib/devApiProxy.ts). */
+  baseUrl: string;
+  /** The API's own origin, for Socket.IO. */
+  socketOrigin: string;
+}): void {
+  apiBaseUrl = addresses.baseUrl;
+  socketOrigin = addresses.socketOrigin;
 }
 
 export function getApiBaseUrl(): string | null {
   return apiBaseUrl;
 }
 
-/** The API's origin, where the Socket.IO namespaces are mounted. */
+/**
+ * The API's origin, where the Socket.IO namespaces are mounted. Always the
+ * API itself: the development proxy forwards HTTP calls only.
+ */
 export function getApiOrigin(): string | null {
-  return apiBaseUrl ? new URL(apiBaseUrl).origin : null;
+  return socketOrigin;
 }
