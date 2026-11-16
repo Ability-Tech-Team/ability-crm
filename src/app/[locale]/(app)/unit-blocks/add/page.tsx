@@ -8,6 +8,7 @@ import { useUnitBlocksAddPage } from './hooks/useUnitBlocksAddPage';
 import {
   getUnitSearchButtons,
   getUnitSearchFields,
+  LIMIT,
   unitSearchSchema,
 } from './schema';
 import { UNIT_SEARCH_INITIAL_VALUES } from './utils';
@@ -19,11 +20,16 @@ export default function UnitBlocksAddPage() {
   const {
     canAdd,
     units,
+    totalCount,
+    currentPage,
+    pageSize,
     isLoading,
     hasSearched,
     rentalCompanyMap,
     handleSubmit,
     handleReset,
+    handlePageChange,
+    handlePageSizeChange,
     openUnit,
   } = useUnitBlocksAddPage();
 
@@ -47,6 +53,12 @@ export default function UnitBlocksAddPage() {
             tUnits={tUnits}
             rentalCompanyMap={rentalCompanyMap}
             isLoading={isLoading}
+            itemsPerPage={LIMIT}
+            pageSize={pageSize}
+            currentPage={currentPage}
+            totalCount={totalCount}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
             onRowClick={canAdd ? openUnit : undefined}
           />
         </MainBox>

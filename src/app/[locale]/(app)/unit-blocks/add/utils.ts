@@ -15,7 +15,5 @@ export function buildUnitSearchParams(
     unit_number: data.unit_number || undefined,
     unit_id: data.unit_id ? Number(data.unit_id) : undefined,
     is_exact: data.is_exact === '1',
-    // Returns every unit in the app, with a contract or without.
-    all_units: 1,
   };
 }

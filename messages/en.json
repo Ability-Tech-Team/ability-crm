@@ -2304,5 +2304,20 @@
         "errors": "Rejected rows"
       }
     }
+  },
+  "logs": {
+    "title": "Logs",
+    "results": "Results",
+    "loadError": "Failed to load logs.",
+    "filters": {
+      "module": "Module",
+      "action": "Action",
+      "recordId": "Record ID",
+      "search": "Search in description"
+    },
+    "columns": {
+      "module": "Module",
+      "action": "Action"
+    }
   }
 }

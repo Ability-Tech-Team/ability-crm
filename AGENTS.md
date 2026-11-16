@@ -27,7 +27,11 @@ the workspace instead of assuming it exists.
   app and locally against the development server
   (`api-prd.ability-tech.com`, despite its name; `../docs/MIGRATION.md`). Not ported: the public
   rental-request pages, Amer's legal templates, and the walk-in request edit
-  (its route was removed). Do not add a stub, bypass, or demo mode to the app.
+  (its route was removed). On 2026-11-16 Amer's logs search (`/logs/search`,
+  `GET /module-logs`, the `log_modules` and `log_actions` dropdowns) and its
+  unit-blocks and table fixes were ported; the development server's API
+  doesn't answer `/module-logs` yet. Do not add a stub, bypass, or demo mode
+  to the app.
 - **Sign-in and session** (decided 2026-10-29; rules in `../AGENTS.md`): users
   sign in on Ability Portal; this app has no sign-in page and keeps no
   passwords. The backend's HttpOnly `access_token` cookie is the session, and
@@ -99,7 +103,7 @@ the workspace instead of assuming it exists.
   tests cover the envelope classification and the client's reactions, the
   session cookie and its API address, the trusted-address check, route rules
   and the sidebar, refund actions, ownership payloads, phone input, imports,
-  unit debt, logo addresses, and base URLs.
+  unit debt, logo addresses, base URLs, and the log filters.
 
 Commands, from this directory (details in `README.md`):
 

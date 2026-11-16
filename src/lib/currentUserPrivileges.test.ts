@@ -1,3 +1,4 @@
+import { FileSpreadsheet, ScrollText } from 'lucide-react';
 import { describe, expect, it } from 'vitest';
 import type { RoleMenu } from '@/src/types/rolePrivileges';
 import {
@@ -27,6 +28,14 @@ const MENUS: RoleMenu[] = [
     ],
   },
   {
+    // Amer CRM's Logs menu is 29; here the id is whatever the client's data says.
+    id: 96,
+    menuName: 'Logs',
+    menuitems: [
+      { id: 961, name: 'Search', href: '/logs/search', privileges: [active(PRIVILEGE_IDS.READ, 'Read')] },
+    ],
+  },
+  {
     id: 19,
     menuName: 'Invoices',
     menuitems: [
@@ -49,6 +58,11 @@ describe('canAccessAppPath', () => {
     expect(canAccessAppPath('/imports/customers', indexes)).toBe(true);
     expect(canAccessAppPath('/imports/history', indexes)).toBe(true);
     expect(canAccessAppPath('/imports/units', indexes)).toBe(false);
+  });
+
+  it('opens the logs search the role has', () => {
+    expect(canAccessAppPath('/logs/search', indexes)).toBe(true);
+    expect(canAccessAppPath('/ar/logs/search', indexes)).toBe(true);
   });
 
   it('denies screens whose privileges are all inactive', () => {
@@ -81,5 +95,10 @@ describe('buildSidebarMenu', () => {
       '/imports/customers',
       '/imports/history',
     ]);
+  });
+
+  it('recognizes the Logs and Imports menus by their screens, not their ids', () => {
+    expect(items.find((item) => item.id === '96')?.icon).toBe(ScrollText);
+    expect(items.find((item) => item.id === '90')?.icon).toBe(FileSpreadsheet);
   });
 });

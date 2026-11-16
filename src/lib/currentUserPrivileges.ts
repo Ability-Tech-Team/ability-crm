@@ -164,6 +164,7 @@ export const APP_ROUTE_ACCESS_RULES: AppRouteAccessRule[] = [
     allowedHrefs: ['/definitions/erp-codes'],
   },
   { pattern: '/document-library', allowedHrefs: ['/document-library'] },
+  { pattern: '/logs/search', allowedHrefs: ['/logs/search'] },
   // Excel imports (new in Ability CRM); each screen has its own menu item.
   { pattern: '/imports/units', allowedHrefs: ['/imports/units'] },
   { pattern: '/imports/customers', allowedHrefs: ['/imports/customers'] },

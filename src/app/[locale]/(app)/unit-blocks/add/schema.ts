@@ -3,6 +3,8 @@ import type { ButtonConfig, FieldConfig } from '@/src/components/Form';
 
 type Translate = (key: string) => string;
 
+export const LIMIT = 10;
+
 /** Only the unit is searched here; the block itself is raised on the next page. */
 export const unitSearchSchema = z.object({
   unit_number: z.string().optional(),

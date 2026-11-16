@@ -564,16 +564,15 @@ export default function DataTable<T>({
             value={pageSize}
             onChange={(e) => {
               const newPageSize = Number(e.target.value);
+              setInternalCurrentPage(1);
+
               if (onPageSizeChange) {
+                // The parent resets to page 1 itself. Also calling its (stale)
+                // onPageChange(1) would refetch with the old size.
                 onPageSizeChange(newPageSize);
               } else {
                 setInternalPageSize(newPageSize);
-              }
-
-              if (onPageChange) {
-                onPageChange(1);
-              } else {
-                setInternalCurrentPage(1);
+                onPageChange?.(1);
               }
             }}
             className="px-2 py-1 rounded-lg border border-slate-300 bg-white text-sm text-gray-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-400"

@@ -14,6 +14,7 @@ import {
   List,
   Ban,
   FileSpreadsheet,
+  ScrollText,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { hasActivePrivileges } from '@/src/lib/currentUserPrivileges';
@@ -45,10 +46,12 @@ const MENU_ICON_MAP: Record<number, LucideIcon> = {
 
 /**
  * Menus added in Ability CRM have ids that depend on the client's data, so
- * they are recognized by their screens' hrefs.
+ * they are recognized by their screens' hrefs. Logs is menu 29 in Amer CRM;
+ * that id isn't assumed here.
  */
 const MENU_ICON_BY_HREF_PREFIX: { prefix: string; icon: LucideIcon }[] = [
   { prefix: '/imports/', icon: FileSpreadsheet },
+  { prefix: '/logs/', icon: ScrollText },
 ];
 
 const iconForMenuHrefs = (menu: RoleMenu): LucideIcon | undefined =>

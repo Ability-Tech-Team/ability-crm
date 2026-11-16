@@ -6,6 +6,11 @@ export interface SelectOption {
   value: string;
   label: string;
   description?: string;
+  /**
+   * Heading the option is listed under. Options of one group must be
+   * adjacent: the heading is printed above the first of them.
+   */
+  group?: string;
 }
 
 interface SelectProps extends Omit<
@@ -73,9 +78,12 @@ export default function Select({
   const hasError = errors && errors.length > 0;
   const currentSearchTerm = searchValue ?? searchTerm;
 
-  // Filter options based on search term
-  const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(currentSearchTerm.toLowerCase()),
+  // Filter options based on search term; a group's name matches all of it
+  const normalizedSearchTerm = currentSearchTerm.toLowerCase();
+  const filteredOptions = options.filter(
+    (option) =>
+      option.label.toLowerCase().includes(normalizedSearchTerm) ||
+      !!option.group?.toLowerCase().includes(normalizedSearchTerm),
   );
 
   const allOption: SelectOption = {
@@ -361,48 +369,57 @@ export default function Select({
                 </div>
               ) : displayOptions.length > 0 ? (
                 displayOptions.map((option, index) => (
-                  <div
-                    key={option.value}
-                    ref={(el) => {
-                      optionRefs.current[index] = el;
-                    }}
-                    onClick={() => handleOptionSelect(option)}
-                    className={`
-                      px-3 py-2 cursor-pointer transition-colors duration-150
-                      text-sm hover:bg-sky-50 hover:text-sky-700
-                      ${
-                        selectedValue === option.value
-                          ? 'bg-sky-100 text-sky-800 font-medium'
-                          : 'text-gray-900'
-                      }
-                      ${focusedIndex === index ? 'bg-sky-50 text-sky-700' : ''}
-                    `}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex min-w-0 flex-col">
-                        <span>{option.label}</span>
-                        {option.description ? (
-                          <span className="text-xs text-gray-500">
-                            {option.description}
-                          </span>
-                        ) : null}
-                      </div>
-                      {selectedValue === option.value && (
-                        <svg
-                          className="h-4 w-4 text-sky-600"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                  <React.Fragment key={option.value}>
+                    {/* Headings sit between options without taking an index,
+                        so keyboard focus still steps through options only. */}
+                    {option.group &&
+                      option.group !== displayOptions[index - 1]?.group && (
+                        <div className="px-3 pt-3 pb-1 text-xs font-semibold text-gray-500 select-none">
+                          {option.group}
+                        </div>
                       )}
+                    <div
+                      ref={(el) => {
+                        optionRefs.current[index] = el;
+                      }}
+                      onClick={() => handleOptionSelect(option)}
+                      className={`
+                        ${option.group ? 'ps-6 pe-3' : 'px-3'} py-2 cursor-pointer transition-colors duration-150
+                        text-sm hover:bg-sky-50 hover:text-sky-700
+                        ${
+                          selectedValue === option.value
+                            ? 'bg-sky-100 text-sky-800 font-medium'
+                            : 'text-gray-900'
+                        }
+                        ${focusedIndex === index ? 'bg-sky-50 text-sky-700' : ''}
+                      `}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 flex-col">
+                          <span>{option.label}</span>
+                          {option.description ? (
+                            <span className="text-xs text-gray-500">
+                              {option.description}
+                            </span>
+                          ) : null}
+                        </div>
+                        {selectedValue === option.value && (
+                          <svg
+                            className="h-4 w-4 text-sky-600"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </React.Fragment>
                 ))
               ) : (
                 <div className="px-3 py-6 text-sm text-gray-500 text-center">

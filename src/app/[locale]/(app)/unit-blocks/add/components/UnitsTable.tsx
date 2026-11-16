@@ -12,6 +12,12 @@ type UnitsTableProps = {
   tUnits: Translate;
   rentalCompanyMap: Map<number, string>;
   isLoading: boolean;
+  itemsPerPage: number;
+  pageSize: number;
+  currentPage: number;
+  totalCount: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
   onRowClick?: (row: Unit) => void;
 };
 
@@ -25,6 +31,12 @@ export default function UnitsTable({
   tUnits,
   rentalCompanyMap,
   isLoading,
+  itemsPerPage,
+  pageSize,
+  currentPage,
+  totalCount,
+  onPageChange,
+  onPageSizeChange,
   onRowClick,
 }: UnitsTableProps) {
   const columns = useMemo<ColumnDef<Unit>[]>(
@@ -279,6 +291,12 @@ export default function UnitsTable({
       columns={columns}
       rowKey={(row) => row.id}
       loading={isLoading}
+      itemsPerPage={itemsPerPage}
+      pageSize={pageSize}
+      currentPage={currentPage}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
+      onPageSizeChange={onPageSizeChange}
       persistKey="unit-blocks-add-columns"
       showColumnToggle
       onRowClick={onRowClick}

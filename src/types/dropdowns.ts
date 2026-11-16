@@ -28,6 +28,26 @@ export type LocationDropdownOption = {
   children: LocationDropdownOption[];
 };
 
+export type LogModuleOption = {
+  id: number;
+  name: string;
+  en_name?: string;
+  ar_name?: string;
+  /** Registry key, e.g. `units`. */
+  module: string;
+  /** Audited table. */
+  table: string;
+};
+
+/** One `log_modules` group: a sidebar menu and the log modules under it. */
+export type LogModuleGroup = {
+  id: number;
+  name: string;
+  en_name?: string;
+  ar_name?: string;
+  modules: LogModuleOption[];
+};
+
 export type AllDropdownsResponse = {
   result: {
     menuitems?: DropdownOption[];
@@ -76,10 +96,14 @@ export type AllDropdownsResponse = {
     ownership_management_statuses?: DropdownOption[];
     unit_block_categories?: DropdownOption[];
     contact_channels?: DropdownOption[];
+    /** Keyed by menu id, unlike every other dropdown; the filter takes a module id. */
+    log_modules?: Record<string, LogModuleGroup>;
+    log_actions?: DropdownOption[];
     [key: string]:
       | DropdownOption[]
       | LocationDropdownOption[]
       | SystemConfigOption[]
+      | Record<string, LogModuleGroup>
       | undefined;
   };
   success: boolean;
