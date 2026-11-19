@@ -3,8 +3,9 @@
 Ability CRM is Ability-Tech's commercial CRM product for independent client
 organizations. It carries Amer CRM's screens (`../Amer-CRM`, `development`
 branch), adapted to the Ability CRM backend, a copy of Amer CRM's backend
-without SAP, Milango, or the API gateway. The backend's changes are listed in
-`../docs/ABILITY-CRM-BACKEND-CHANGES.md`.
+without SAP, Milango, or the API gateway. The backend's source is
+`../ability-crm-api/` (this app's API is its `crm-api` service, prefix `/crm`),
+and its changes are listed in `../ability-crm-api/docs/frontend-changes.md`.
 
 Users sign in on Ability Portal; this app has no sign-in page. The backend's
 HttpOnly `access_token` cookie is the session, and the backend's users, roles,
@@ -170,6 +171,8 @@ API calls in `src/services/`, shared UI in `src/components/`, and state in
 
 ## Repository
 
-This directory is its own Git repository, with its own `origin` remote on
-GitHub (`Ability-Tech-Team`). It shares no history or remote with Amer CRM or
-the other apps.
+Since 2026-11-12 this directory is a folder of the `CRM/` monorepo
+(`Ability-Tech-Team/ability-mono-repo`), with Community Admin and Ability
+Portal. It shares no history or remote with Amer CRM or the backend
+(`../ability-crm-api`), which are separate repositories. Run Git from `CRM/`
+and keep each commit to this folder (`../README.md`, Repositories).

@@ -14,13 +14,21 @@ the workspace instead of assuming it exists.
   change sibling apps unless the request names them; a CRM change does not
   require a matching Community Admin change.
 - **Independence:** this app has its own manifest, lockfile, environment files,
-  build output, and local Git repository. Never import runtime code from
-  `../Amer-CRM`, `../Ability-Community-Admin`, or `../Ability-Portal`. Copy and
+  and build output. It is a folder of the `CRM/` monorepo (since 2026-11-12),
+  not a repository of its own. Never import runtime code from
+  `../Amer-CRM`, `../Ability-Community-Admin`, `../Ability-Portal`, or
+  `../ability-crm-api`. Copy and
   adapt reference code from Amer CRM when useful, and record its source in
   `../docs/MIGRATION.md`.
+- **Backend:** this app's API is `../ability-crm-api/apps/crm-api` (prefix
+  `/crm`), with shared modules in its `libs/domain` and `libs/core`. Read a
+  route's controller, DTOs, and guards there before using it. The backend's
+  differences from Amer CRM's API are in
+  `../ability-crm-api/docs/frontend-changes.md`. Rules for changing the
+  backend are in `../AGENTS.md` ("The backend repository").
 - **Status (2026-10-29):** Amer CRM's screens are ported from its
   `development` branch and adapted to the Ability CRM backend
-  (`../docs/ABILITY-CRM-BACKEND-CHANGES.md`): SAP removed, ERP account codes,
+  (`../ability-crm-api/docs/frontend-changes.md`): SAP removed, ERP account codes,
   `customer_id` on tickets, complaints, invoices, CTS, and documents, uploaded
   unit debt, ownership end and edit, and the new Imports screens. Since
   2026-11-11 it follows the API's renamed routes and works on the published
