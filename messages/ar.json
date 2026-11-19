@@ -1599,6 +1599,37 @@
     "passwordMinLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل وتحتوي على حرف كبير وحرف صغير ورمز خاص",
     "mustChangePasswordHint": "لحماية حسابك، يجب تغيير كلمة المرور قبل المتابعة."
   },
+  "support": {
+    "menuItem": "التواصل مع الدعم",
+    "title": "التواصل مع الدعم",
+    "intro": "أرسل رسالة إلى فريق دعم Ability-Tech، وسيرد عليك عبر البريد الإلكتروني.",
+    "category": "الفئة",
+    "categoryPlaceholder": "اختر فئة",
+    "categories": {
+      "technical_issue": "مشكلة تقنية",
+      "account_access": "الحساب والدخول",
+      "billing": "الفواتير والاشتراك",
+      "feature_request": "طلب ميزة",
+      "other": "أخرى"
+    },
+    "subject": "الموضوع",
+    "subjectPlaceholder": "ملخص قصير",
+    "message": "الرسالة",
+    "messagePlaceholder": "ماذا حدث، وما الذي كنت تتوقعه، والخطوات التي أدت إلى ذلك.",
+    "messageCounter": "{count} / {max}",
+    "send": "إرسال",
+    "validation": {
+      "categoryRequired": "اختر فئة.",
+      "subjectLength": "اكتب موضوعًا من {min} إلى {max} حرفًا.",
+      "subjectSingleLine": "اكتب الموضوع في سطر واحد.",
+      "messageLength": "اكتب رسالة من {min} إلى {max} حرفًا."
+    },
+    "tooManyRequests": "أرسلت عدة طلبات خلال الساعة الأخيرة. يرجى الانتظار قبل إرسال طلب آخر.",
+    "sentTitle": "تم إرسال الطلب",
+    "sentReference": "رقمك المرجعي هو <strong>{reference}</strong>. اذكره إذا راسلت الدعم بشأن هذا الطلب مرة أخرى.",
+    "sentReplyTo": "سيرد فريق دعم Ability-Tech على <strong>{email}</strong>.",
+    "sentNoEmail": "لا يوجد بريد إلكتروني في حسابك، لذلك لا يستطيع الفريق الرد عبر البريد. اطلب من المسؤول إضافة بريد إلكتروني إلى حسابك."
+  },
   "notFound": {
     "title": "الصفحة غير موجودة",
     "message": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
@@ -2247,7 +2278,9 @@
     "FAILED_UPDATE_ERP_REFERENCE": "تعذر تحديث مرجع ERP.",
     "ALREADY_EXISTS": "هذا السجل موجود بالفعل.",
     "INVALID_DATA_PROVIDED": "بعض البيانات غير صحيحة.",
-    "UNIT_ALREADY_HAS_BLOCK": "هذه الوحدة عليها حظر نشط بالفعل."
+    "UNIT_ALREADY_HAS_BLOCK": "هذه الوحدة عليها حظر نشط بالفعل.",
+    "SUPPORT_NOT_CONFIGURED": "التواصل مع الدعم غير متاح لحسابك بعد.",
+    "SUPPORT_REQUEST_NOT_SENT": "تعذر إرسال طلبك. يرجى المحاولة مرة أخرى بعد بضع دقائق."
   },
   "imports": {
     "fileLabel": "ملف Excel",

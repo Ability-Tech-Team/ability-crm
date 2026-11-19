@@ -9,6 +9,7 @@ import {
   LogOut,
   X,
   Lock,
+  LifeBuoy,
 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useSidebarStore } from '@/src/store/useSidebarStore';
@@ -18,6 +19,7 @@ import { getLocaleDirection, type AppLocale } from '@/src/i18n/routing';
 import LanguageSwitcherCompact from './LanguageSwitcherCompact';
 import HeaderSearch from './HeaderSearch';
 import ChangePasswordModal from './ChangePasswordModal';
+import ContactSupportModal from './ContactSupportModal';
 import { useState, useRef, useEffect } from 'react';
 import { logoutAndClearSession } from '@/src/lib/logout';
 import { buildPortalHomeUrl } from '@/src/lib/portal';
@@ -35,6 +37,7 @@ export default function Header() {
   const t = useTranslations('common');
   const tAuth = useTranslations('auth');
   const tSession = useTranslations('session');
+  const tSupport = useTranslations('support');
   const locale = useLocale();
   const isRtl = getLocaleDirection(locale as AppLocale) === 'rtl';
   // The Portal's product cards, in the same language. Hidden when
@@ -47,6 +50,7 @@ export default function Header() {
   const [notifications] = useState<Notification[]>([]);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isContactSupportOpen, setIsContactSupportOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -225,6 +229,16 @@ export default function Header() {
                 <button
                   onClick={() => {
                     setIsUserMenuOpen(false);
+                    setIsContactSupportOpen(true);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <LifeBuoy size={16} className="text-[#8F9BB3]" />
+                  {tSupport('menuItem')}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
                     setIsChangePasswordOpen(true);
                   }}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -249,6 +263,11 @@ export default function Header() {
       <ChangePasswordModal
         open={isChangePasswordOpen}
         onClose={() => setIsChangePasswordOpen(false)}
+      />
+
+      <ContactSupportModal
+        open={isContactSupportOpen}
+        onClose={() => setIsContactSupportOpen(false)}
       />
     </header>
   );

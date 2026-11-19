@@ -1599,6 +1599,37 @@
     "passwordMinLength": "Password must be at least 8 characters and include uppercase, lowercase, and a special character",
     "mustChangePasswordHint": "For your security, you must change your password before continuing."
   },
+  "support": {
+    "menuItem": "Contact support",
+    "title": "Contact support",
+    "intro": "Send a message to Ability-Tech's support team. They will answer by email.",
+    "category": "Category",
+    "categoryPlaceholder": "Choose a category",
+    "categories": {
+      "technical_issue": "Technical issue",
+      "account_access": "Account and access",
+      "billing": "Billing and subscription",
+      "feature_request": "Feature request",
+      "other": "Other"
+    },
+    "subject": "Subject",
+    "subjectPlaceholder": "A short summary",
+    "message": "Message",
+    "messagePlaceholder": "What happened, what you expected, and the steps that lead to it.",
+    "messageCounter": "{count} / {max}",
+    "send": "Send",
+    "validation": {
+      "categoryRequired": "Choose a category.",
+      "subjectLength": "Write a subject of {min} to {max} characters.",
+      "subjectSingleLine": "Keep the subject on one line.",
+      "messageLength": "Write a message of {min} to {max} characters."
+    },
+    "tooManyRequests": "You have sent several requests in the last hour. Please wait before sending another.",
+    "sentTitle": "Request sent",
+    "sentReference": "Your reference is <strong>{reference}</strong>. Quote it if you write to support about this again.",
+    "sentReplyTo": "Ability-Tech's support team will answer at <strong>{email}</strong>.",
+    "sentNoEmail": "Your account has no email address, so the team can't answer by email. Ask your administrator to add one to your account."
+  },
   "notFound": {
     "title": "Page Not Found",
     "message": "The page you are looking for does not exist or has been moved.",
@@ -2247,7 +2278,9 @@
     "FAILED_UPDATE_ERP_REFERENCE": "The ERP reference couldn’t be updated.",
     "ALREADY_EXISTS": "This record already exists.",
     "INVALID_DATA_PROVIDED": "Some of the data isn’t valid.",
-    "UNIT_ALREADY_HAS_BLOCK": "This unit already has an active block."
+    "UNIT_ALREADY_HAS_BLOCK": "This unit already has an active block.",
+    "SUPPORT_NOT_CONFIGURED": "Contact support isn't available for your account yet.",
+    "SUPPORT_REQUEST_NOT_SENT": "Your request couldn't be sent. Please try again in a few minutes."
   },
   "imports": {
     "fileLabel": "Excel sheet",
