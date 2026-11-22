@@ -13,9 +13,14 @@ the workspace instead of assuming it exists.
   CRM is also the workspace's default target for feature requests. Do not
   change sibling apps unless the request names them; a CRM change does not
   require a matching Community Admin change.
+- **Repositories (the user's arrangement, 2026-11-22):** this folder is in
+  both the `CRM/` monorepo and its own repository (`origin`
+  `Ability-Tech-Team/ability-crm`, branch `main`, nested here since
+  2026-11-22, with the same files). Git run here resolves to the nested one;
+  `git status` from `CRM/` shows the monorepo's view. The user commits and
+  pushes in both; leave changes uncommitted (`../AGENTS.md`, Read first).
 - **Independence:** this app has its own manifest, lockfile, environment files,
-  and build output. It is a folder of the `CRM/` monorepo (since 2026-11-12),
-  not a repository of its own. Never import runtime code from
+  and build output. Never import runtime code from
   `../Amer-CRM`, `../Ability-Community-Admin`, `../Ability-Portal`, or
   `../ability-crm-api`. Copy and
   adapt reference code from Amer CRM when useful, and record its source in
