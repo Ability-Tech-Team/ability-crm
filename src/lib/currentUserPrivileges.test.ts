@@ -17,6 +17,7 @@ const MENUS: RoleMenu[] = [
     menuitems: [
       { id: 31, name: 'ERP codes', href: '/definitions/erp-codes', privileges: [active(PRIVILEGE_IDS.READ, 'Read')] },
       { id: 32, name: 'Departments', href: '/definitions/department', privileges: [{ id: 34, name: 'Read', status: 0 }] },
+      { id: 33, name: 'Locations', href: '/definitions/location', privileges: [active(PRIVILEGE_IDS.READ, 'Read')] },
     ],
   },
   {
@@ -85,8 +86,20 @@ describe('buildSidebarMenu', () => {
 
   it('shows only screens with an active privilege', () => {
     const definitions = items.find((item) => item.id === '3');
-    // One active item left: a direct link, not a group.
-    expect(definitions).toMatchObject({ href: '/definitions/erp-codes' });
+    // Departments is inactive and ERP codes is hidden, so one item is left:
+    // a direct link, not a group.
+    expect(definitions).toMatchObject({ href: '/definitions/location' });
+    expect(definitions?.subItems).toBeUndefined();
+  });
+
+  it('keeps ERP codes off the menu even when the role has it', () => {
+    const hrefs = items.flatMap((item) => [
+      item.href,
+      ...(item.subItems?.map((sub) => sub.href) ?? []),
+    ]);
+    expect(hrefs).not.toContain('/definitions/erp-codes');
+    // The page itself still opens for the role.
+    expect(canAccessAppPath('/definitions/erp-codes', indexes)).toBe(true);
   });
 
   it('groups menus with several screens', () => {

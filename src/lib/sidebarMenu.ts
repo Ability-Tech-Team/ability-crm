@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { hasActivePrivileges } from '@/src/lib/currentUserPrivileges';
-import type { RoleMenu } from '@/src/types/rolePrivileges';
+import type { RoleMenu, RoleMenuItem } from '@/src/types/rolePrivileges';
 import type { SidebarItem, SidebarSubItem } from '@/src/types/sidebar';
 
 /** Maps parent menu IDs to icons. Unknown menus get the fallback icon. */
@@ -89,6 +89,22 @@ const FALLBACK_ICON: LucideIcon = List;
 const SUB_ITEM_ICON: LucideIcon = List;
 
 /**
+ * Screens kept off the menu even when the role has them. The page and its
+ * route rule stay, so a direct link still opens it. Delete a line to show the
+ * screen on the menu again.
+ */
+const HIDDEN_MENU_HREFS = new Set<string>([
+  '/definitions/erp-codes', // ERP Codes, hidden 2026-11-22
+]);
+
+const isShownOnMenu = (
+  item: RoleMenuItem,
+): item is RoleMenuItem & { href: string } =>
+  Boolean(item.href) &&
+  !HIDDEN_MENU_HREFS.has(item.href ?? '') &&
+  hasActivePrivileges(item);
+
+/**
  * Sub-item order for one menu, by href. A menu not listed here keeps the
  * backend's order untouched, and so does any href the list omits — those
  * follow the listed ones, in the order the backend sent them.
@@ -122,9 +138,7 @@ const buildSubItems = (menu: RoleMenu): SidebarSubItem[] => {
   const seenHrefs = new Set<string>();
 
   for (const item of menu.menuitems) {
-    if (!item.href || seenHrefs.has(item.href) || !hasActivePrivileges(item)) {
-      continue;
-    }
+    if (!isShownOnMenu(item) || seenHrefs.has(item.href)) continue;
 
     seenHrefs.add(item.href);
     subItems.push({
@@ -144,10 +158,7 @@ export const buildSidebarMenu = (menus: RoleMenu[]): SidebarItem[] => {
   for (const menu of applyMenuPlacements(menus)) {
     const icon =
       MENU_ICON_MAP[menu.id] ?? iconForMenuHrefs(menu) ?? FALLBACK_ICON;
-    const menuItems =
-      menu.menuitems?.filter(
-        (menuItem) => menuItem.href && hasActivePrivileges(menuItem),
-      ) ?? [];
+    const menuItems = menu.menuitems?.filter(isShownOnMenu) ?? [];
 
     // Single menu item → render as a direct link
     if (menuItems.length === 1) {
@@ -155,7 +166,7 @@ export const buildSidebarMenu = (menus: RoleMenu[]): SidebarItem[] => {
         id: String(menu.id),
         label: menu.menuName,
         icon,
-        href: menuItems[0].href!,
+        href: menuItems[0].href,
       });
       continue;
     }
