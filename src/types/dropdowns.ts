@@ -28,6 +28,21 @@ export type LocationDropdownOption = {
   children: LocationDropdownOption[];
 };
 
+/** A sub-project of the sign-in project; imports and units match it by `project_code`. */
+export type SubProjectOption = {
+  id: number;
+  project_id: number;
+  project_code: string;
+  /** The name in the request's language, or the code when it has none. */
+  name: string;
+};
+
+export type CountryOption = DropdownOption & {
+  nationality?: string | null;
+  country_code?: string | null;
+  phone_code?: string | null;
+};
+
 export type LogModuleOption = {
   id: number;
   name: string;
@@ -69,6 +84,9 @@ export type AllDropdownsResponse = {
     sister_companies?: DropdownOption[];
     unit_types?: DropdownOption[];
     company_projects?: DropdownOption[];
+    /** The sign-in project's active sub-projects. */
+    sub_projects?: SubProjectOption[];
+    countries?: CountryOption[];
     marital_statuses?: DropdownOption[];
     religions?: DropdownOption[];
     customer_types?: DropdownOption[];
@@ -101,6 +119,7 @@ export type AllDropdownsResponse = {
     log_actions?: DropdownOption[];
     [key: string]:
       | DropdownOption[]
+      | SubProjectOption[]
       | LocationDropdownOption[]
       | SystemConfigOption[]
       | Record<string, LogModuleGroup>

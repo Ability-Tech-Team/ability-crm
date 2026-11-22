@@ -2280,7 +2280,10 @@
     "INVALID_DATA_PROVIDED": "Some of the data isn’t valid.",
     "UNIT_ALREADY_HAS_BLOCK": "This unit already has an active block.",
     "SUPPORT_NOT_CONFIGURED": "Contact support isn't available for your account yet.",
-    "SUPPORT_REQUEST_NOT_SENT": "Your request couldn't be sent. Please try again in a few minutes."
+    "SUPPORT_REQUEST_NOT_SENT": "Your request couldn't be sent. Please try again in a few minutes.",
+    "INVALID_SUB_PROJECT": "Choose a sub-project of this project.",
+    "UNIT_NOT_FOUND": "The unit wasn’t found in this project.",
+    "RELATIVE_ALREADY_ON_UNIT": "This person is already registered on this unit."
   },
   "imports": {
     "fileLabel": "Excel sheet",
@@ -2304,7 +2307,7 @@
     "units": {
       "title": "Import units",
       "description": "Upload a sheet of units to add them to the system.",
-      "columns": "As in the units template from your administrator"
+      "columns": "unit_number (required), plus unit_type, area, floor, sub_project (the sub-project’s code) and address. A unit already on file is skipped, never changed."
     },
     "customers": {
       "title": "Import customers",
@@ -2314,7 +2317,7 @@
     "relatives": {
       "title": "Import relatives",
       "description": "Upload a sheet of owners’ relatives.",
-      "columns": "As in the relatives template from your administrator"
+      "columns": "owner_id_number, unit_number, relative_name and relative_id_number (required), plus relation, mobile, email, id_type (National ID or Passport), is_male (1 or 0) and sub_project. The owner must already hold the unit."
     },
     "unit-debts": {
       "title": "Import unit debts",
@@ -2326,7 +2329,7 @@
       "refresh": "Refresh",
       "loading": "Loading…",
       "loadError": "The import history couldn’t be loaded.",
-      "downloadErrors": "Rejected rows (CSV)",
+      "downloadErrors": "Rejected rows",
       "columns": {
         "id": "ID",
         "kind": "Type",
@@ -2335,6 +2338,106 @@
         "createdBy": "Uploaded by",
         "createdAt": "Uploaded at",
         "errors": "Rejected rows"
+      }
+    },
+    "template": {
+      "download": "Download template",
+      "downloading": "Downloading…",
+      "hint": "An empty Excel sheet with the columns above, required ones first."
+    },
+    "entry": {
+      "save": "Add",
+      "saving": "Adding…",
+      "reset": "Clear",
+      "cancel": "Cancel",
+      "required": "This field is required.",
+      "tooLong": "This is too long.",
+      "wholeNumber": "Enter a whole number.",
+      "nonNegativeNumber": "Enter a number of 0 or more.",
+      "invalidEmail": "Enter a valid email address.",
+      "invalidPhone": "Enter a valid phone number (8 to 15 digits).",
+      "nationalIdFormat": "A National ID is 14 digits.",
+      "passportFormat": "A passport number is 6 to 20 letters or digits.",
+      "idNumberLength": "The ID number must be 5 to 50 characters.",
+      "endBeforeStart": "The end date can’t be before the start date.",
+      "unitNotFound": "No unit {unit} was found in this project. Add the unit first.",
+      "unitNotInSubProject": "No unit {unit} was found in sub-project {subProject}.",
+      "unitAmbiguous": "Several units are numbered {unit}. Choose the sub-project.",
+      "units": {
+        "title": "Add a unit manually",
+        "description": "Adds one unit to this project with its specification. A unit number already used in the same sub-project is refused.",
+        "unitNumber": "Unit number",
+        "subProject": "Sub-project",
+        "noSubProject": "No sub-project",
+        "unitType": "Unit type",
+        "location": "Location",
+        "totalArea": "Total area",
+        "floor": "Floor",
+        "address": "Address",
+        "rooms": "Rooms",
+        "bathrooms": "Bathrooms",
+        "livingRooms": "Living rooms",
+        "balconies": "Balconies",
+        "deliveryDate": "Delivery date",
+        "contractingDate": "Contracting date",
+        "notes": "Notes",
+        "isActive": "Active",
+        "isEligibleForRent": "Eligible for rent",
+        "isFurnished": "Furnished",
+        "isBroker": "Broker",
+        "saved": "Unit {unit} was added."
+      },
+      "customers": {
+        "title": "Add a customer manually",
+        "description": "Adds one customer and links them to a unit that already exists. A customer already in this project is linked, not added again.",
+        "customerName": "Customer name",
+        "idType": "ID type",
+        "idNumber": "ID number",
+        "country": "Country",
+        "maritalStatus": "Marital status",
+        "religion": "Religion",
+        "customerType": "Customer type",
+        "mobile": "Mobile",
+        "email": "Email",
+        "customerCode": "Customer code",
+        "unitNumber": "Unit number",
+        "subProject": "Sub-project",
+        "anySubProject": "The unit’s sub-project, if only one has this number",
+        "ownership": "Ownership",
+        "ownerType": "Owner type",
+        "ownerTypeDefault": "Owner",
+        "contractNumber": "Contract number",
+        "startDate": "Start date",
+        "signDate": "Sign date (default: the start date)",
+        "endDate": "End date",
+        "saved": "{name} was added and linked to unit {unit}.",
+        "linked": "Unit {unit} was linked to {name}.",
+        "createdNotLinked": "{name} was added, but unit {unit} wasn’t linked. Fix the problem and add again: the unit will be linked to this customer.",
+        "ownerTypeNotSet": "Unit {unit} was linked to {name} as Owner, but the owner type wasn’t set. Change it from the unit’s ownerships.",
+        "existingTitle": "Customer already in this project",
+        "existingMessage": "{name} already has this ID number. Link unit {unit} to them? Their details stay as they are.",
+        "linkExisting": "Link the unit"
+      },
+      "relatives": {
+        "title": "Add a relative manually",
+        "description": "Adds one relative to a unit their owner holds, with the same checks as the relatives sheet. A customer who already has the relative’s ID number is linked as they are.",
+        "ownerIdNumber": "Owner’s ID number",
+        "unitNumber": "Unit number",
+        "subProject": "Sub-project",
+        "anySubProject": "The unit’s sub-project, if only one has this number",
+        "relativeName": "Relative’s name",
+        "idType": "ID type",
+        "idTypeDefault": "National ID",
+        "relativeIdNumber": "Relative’s ID number",
+        "gender": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "relation": "Relation",
+        "mobile": "Mobile",
+        "email": "Email",
+        "sameAsOwner": "A relative can’t have the owner’s ID number.",
+        "ownerNotFound": "No customer with ID number {idNumber} was found in this project. Add the owner first.",
+        "saved": "{name} was added as a relative of {owner} on unit {unit}."
       }
     }
   },

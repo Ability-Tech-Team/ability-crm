@@ -5,9 +5,10 @@ import { ApiError, readEnvelopeFailure } from '@/src/lib/apiErrors';
 /**
  * Excel imports (new in Ability CRM; docs/ABILITY-CRM-BACKEND-CHANGES.md,
  * section 9): multipart uploads to `POST /imports/<kind>`, the import history
- * (`GET /imports`, `GET /imports/:id`), and a CSV of the rejected rows
- * (`GET /imports/:id/errors`). Re-uploading a customers sheet updates what it
- * carries, so each import reports inserted, updated, and skipped rows.
+ * (`GET /imports`, `GET /imports/:id`), the file of the rejected rows
+ * (`GET /imports/:id/errors`), and the empty sheets to fill
+ * (`GET /imports/<kind>/template`). Re-uploading a customers sheet updates
+ * what it carries, so each import reports inserted, updated, and skipped rows.
  */
 
 export const IMPORT_KINDS = [
@@ -152,11 +153,23 @@ export async function getImport(
   return toImportRecord(response.data?.result);
 }
 
-/** Saves the CSV of an import's rejected rows. */
-export async function downloadImportErrors(id: number): Promise<void> {
-  const response = await api.get<Blob>(`/imports/${id}/errors`, {
-    responseType: 'blob',
-  });
+/** The kinds with an empty sheet to download (`GET /imports/<kind>/template`). */
+export const IMPORT_TEMPLATE_KINDS = ['units', 'customers', 'relatives'] as const;
+
+export type ImportTemplateKind = (typeof IMPORT_TEMPLATE_KINDS)[number];
+
+export function hasImportTemplate(kind: ImportKind): kind is ImportTemplateKind {
+  return (IMPORT_TEMPLATE_KINDS as readonly string[]).includes(kind);
+}
+
+const XLSX_CONTENT_TYPE =
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+/** A download's file, or the API's failure when the answer is a JSON envelope. */
+async function readDownload(
+  path: string,
+): Promise<Blob> {
+  const response = await api.get<Blob>(path, { responseType: 'blob' });
   const blob = response.data;
 
   // A failure still arrives as a JSON envelope.
@@ -169,14 +182,44 @@ export async function downloadImportErrors(id: number): Promise<void> {
     }
   }
 
-  const objectUrl = URL.createObjectURL(
-    blob.type ? blob : new Blob([blob], { type: 'text/csv' }),
-  );
+  return blob;
+}
+
+/** Hands a file to the browser's download. */
+function saveBlob(blob: Blob, fileName: string): void {
+  const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = objectUrl;
-  link.download = `import-${id}-errors.csv`;
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+}
+
+/** The file name for an import's rejected rows: xlsx now, CSV for reports made before. */
+export function importErrorsFileName(id: number, contentType: string): string {
+  const extension = contentType.includes('spreadsheetml') ? 'xlsx' : 'csv';
+  return `import-${id}-errors.${extension}`;
+}
+
+/** Saves the file of an import's rejected rows. */
+export async function downloadImportErrors(id: number): Promise<void> {
+  const blob = await readDownload(`/imports/${id}/errors`);
+  const file = blob.type ? blob : new Blob([blob], { type: 'text/csv' });
+  saveBlob(file, importErrorsFileName(id, file.type));
+}
+
+/**
+ * Saves the empty sheet for `kind`: the header row in the column names the
+ * import reads, required columns first, and a second tab listing which are
+ * required. The backend builds it from the columns it reads, so the two
+ * can't drift apart.
+ */
+export async function downloadImportTemplate(
+  kind: ImportTemplateKind,
+): Promise<void> {
+  const blob = await readDownload(`/imports/${kind}/template`);
+  const file = blob.type ? blob : new Blob([blob], { type: XLSX_CONTENT_TYPE });
+  saveBlob(file, `${kind}-template.xlsx`);
 }

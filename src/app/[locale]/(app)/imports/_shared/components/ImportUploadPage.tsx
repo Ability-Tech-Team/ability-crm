@@ -9,9 +9,10 @@ import Button from '@/src/components/ui/Button';
 import MainBox from '@/src/components/ui/MainBox';
 import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { Link } from '@/src/i18n/navigation';
-import type { ImportKind } from '@/src/services/imports';
+import { hasImportTemplate, type ImportKind } from '@/src/services/imports';
 import { useImportUpload } from '../hooks/useImportUpload';
 import ImportCounts from './ImportCounts';
+import TemplateDownloadButton from './TemplateDownloadButton';
 
 const ACCEPTED_TYPES =
   '.xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv';
@@ -20,10 +21,19 @@ type ImportUploadPageProps = {
   kind: ImportKind;
   /** The screen's menu href, e.g. `/imports/units`. */
   href: string;
+  /** The manual entry form, shown under the upload to whoever can open the screen. */
+  children?: React.ReactNode;
 };
 
-/** Upload a units, customers, relatives, or unit-debts sheet. */
-export default function ImportUploadPage({ kind, href }: ImportUploadPageProps) {
+/**
+ * Upload a units, customers, relatives, or unit-debts sheet, download the
+ * empty sheet to fill, or add one record by hand.
+ */
+export default function ImportUploadPage({
+  kind,
+  href,
+  children,
+}: ImportUploadPageProps) {
   const t = useTranslations('imports');
   const privileges = useRoutePrivileges(href);
   const historyPrivileges = useRoutePrivileges('/imports/history');
@@ -49,6 +59,12 @@ export default function ImportUploadPage({ kind, href }: ImportUploadPageProps) 
           </span>{' '}
           {t(`${kind}.columns`)}
         </p>
+        {hasImportTemplate(kind) ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <TemplateDownloadButton kind={kind} />
+            <span className="text-sm text-slate-500">{t('template.hint')}</span>
+          </div>
+        ) : null}
 
         <form
           className="flex flex-col gap-3 sm:flex-row sm:items-end"
@@ -104,6 +120,8 @@ export default function ImportUploadPage({ kind, href }: ImportUploadPageProps) 
           </div>
         </MainBox>
       ) : null}
+
+      {children}
     </div>
   );
 }

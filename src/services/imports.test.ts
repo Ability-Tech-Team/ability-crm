@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { toImportRecord } from './imports';
+import { hasImportTemplate, importErrorsFileName, toImportRecord } from './imports';
 
 describe('toImportRecord', () => {
   it('reads an import status with the updated count', () => {
@@ -37,5 +37,26 @@ describe('toImportRecord', () => {
     });
     expect(toImportRecord({ file_name: 'x.xlsx' })).toBeNull();
     expect(toImportRecord(null)).toBeNull();
+  });
+});
+
+describe('import files', () => {
+  it('names the rejected rows by the file the API sends', () => {
+    expect(
+      importErrorsFileName(
+        12,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ),
+    ).toBe('import-12-errors.xlsx');
+    expect(importErrorsFileName(12, 'text/csv; charset=utf-8')).toBe(
+      'import-12-errors.csv',
+    );
+  });
+
+  it('offers a template for the units, customers, and relatives sheets only', () => {
+    expect(hasImportTemplate('units')).toBe(true);
+    expect(hasImportTemplate('customers')).toBe(true);
+    expect(hasImportTemplate('relatives')).toBe(true);
+    expect(hasImportTemplate('unit-debts')).toBe(false);
   });
 });

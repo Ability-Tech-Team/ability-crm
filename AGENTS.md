@@ -111,8 +111,8 @@ the workspace instead of assuming it exists.
   tests cover the envelope classification and the client's reactions, the
   session cookie and its API address, the trusted-address check, route rules
   and the sidebar, refund actions, ownership payloads, phone input, imports,
-  unit debt, logo addresses, base URLs, the log filters, and support
-  requests.
+  unit debt, logo addresses, base URLs, the log filters, support
+  requests, and the Imports screens' manual entry forms.
 
 Commands, from this directory (details in `README.md`):
 

@@ -161,6 +161,132 @@ export async function getCustomerById(
   return customers.find((customer) => customer.id === id) ?? null;
 }
 
+/**
+ * The live customer with exactly this ID number in the sign-in project, or
+ * null. The API normalizes the ID number (trimmed, upper case) before it
+ * matches.
+ */
+export async function findCustomerByIdNumber(
+  idNumber: string,
+  signal?: AbortSignal,
+): Promise<Customer | null> {
+  const wanted = idNumber.trim().toUpperCase();
+  if (!wanted) return null;
+
+  const { customers } = await getCustomers(
+    { id_number: wanted, limit: 5 },
+    signal,
+  );
+  return (
+    customers.find(
+      (customer) => customer.id_number?.trim().toUpperCase() === wanted,
+    ) ?? null
+  );
+}
+
+/** `POST /customers` (`ability-crm-api/libs/domain/src/customers`). */
+export interface CreateCustomerDto {
+  customer_name: string;
+  country_id: number;
+  id_type: number;
+  id_number: string;
+  marital_status_id: number;
+  religion_id: number;
+  customer_type_id: number;
+  mobile_number?: string;
+  email?: string;
+  customer_code?: string;
+}
+
+/**
+ * Creates a customer in the sign-in project. A customer from another project
+ * with the same ID number is linked to this one and returned unchanged; one
+ * already here is refused with 409 `CUSTOMER_ALREADY_EXISTS`.
+ */
+export async function createCustomer(
+  body: CreateCustomerDto,
+): Promise<{ id: number; customer_name: string }> {
+  const response = await api.post<{
+    result?: { id?: unknown; customer_name?: unknown } | null;
+  }>('/customers', body);
+  const result = response.data?.result;
+  if (typeof result?.id !== 'number') {
+    throw new Error('The API answered without the customer’s id.');
+  }
+  return {
+    id: result.id,
+    customer_name:
+      typeof result.customer_name === 'string'
+        ? result.customer_name
+        : body.customer_name,
+  };
+}
+
+/** `POST /customers/assign-unit-to-customer`. */
+export interface AssignUnitToCustomerDto {
+  customer_id: number;
+  unit_id: number;
+  /** Required by the API even with `unit_id`. */
+  unit_number: string;
+  ownership_id: number;
+  /** `YYYY-MM-DD`. */
+  start_date: string;
+  sign_date: string;
+  end_date?: string;
+  contract_number: string;
+  is_active: number;
+}
+
+/**
+ * Links a unit to a customer. An owner's link starts as owner type Owner;
+ * another owner type is set afterwards with `updateOwnership`. Answers 409
+ * `ASSIGNMENT_ALREADY_EXISTS` for an open link or the same contract.
+ */
+export async function assignUnitToCustomer(
+  body: AssignUnitToCustomerDto,
+): Promise<{ ownershipId: number | null }> {
+  const response = await api.post<{ result?: { id?: unknown } | null }>(
+    '/customers/assign-unit-to-customer',
+    body,
+  );
+  const id = response.data?.result?.id;
+  return { ownershipId: typeof id === 'number' ? id : null };
+}
+
+/** `POST /customers/relatives`. */
+export interface AddRelativeDto {
+  owner_id: number;
+  unit_id: number;
+  relative_name: string;
+  relative_id_number: string;
+  /** 1 Passport, 2 National ID. */
+  id_type?: number;
+  mobile_number?: string;
+  email?: string;
+  /** 1 male, 0 female. */
+  is_male?: number;
+  relation?: string;
+}
+
+/**
+ * Adds one relative to an owner's unit with the relatives sheet's rules: any
+ * of the owner's links to the unit counts, a customer who already has that ID
+ * number is linked but not changed, and the ID number and mobile are checked
+ * as in the sheet. A rejected row answers 400 `RELATIVE_NOT_ADDED` with the
+ * sheet's reason in the message; an existing link 409
+ * `RELATIVE_ALREADY_ON_UNIT`.
+ */
+export async function addRelative(
+  body: AddRelativeDto,
+): Promise<{ relativeId: number | null }> {
+  const response = await api.post<{ result?: { relative_id?: unknown } | null }>(
+    '/customers/relatives',
+    body,
+  );
+  const id = response.data?.result?.relative_id;
+  return { relativeId: typeof id === 'number' ? id : null };
+}
+
 export interface UpdateCustomerDto {
   customer_code?: string;
   id_type?: number | null;

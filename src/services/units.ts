@@ -200,6 +200,21 @@ export async function getUnits(
   return { units, totalCount };
 }
 
+/** The units of the sign-in project numbered exactly `unitNumber`, across its sub-projects. */
+export async function findUnitsByNumber(
+  unitNumber: string,
+  signal?: AbortSignal,
+): Promise<Unit[]> {
+  const wanted = unitNumber.trim();
+  if (!wanted) return [];
+
+  const { units } = await getUnits(
+    { unit_number: wanted, is_exact: true, limit: 50 },
+    signal,
+  );
+  return units.filter((unit) => unit.unit_number === wanted);
+}
+
 export async function getUnitById(
   unitId: number,
   signal?: AbortSignal,
@@ -236,6 +251,47 @@ export interface UpdateUnitPayload {
     balcony_no?: number;
     is_furnished?: number;
   };
+}
+
+/** `POST /projects/unit`, into the sign-in project (`ability-crm-api/apps/crm-api/src/units`). */
+export interface CreateUnitPayload {
+  unit_number: string;
+  sub_project_id?: number;
+  notes?: string;
+  is_active: number;
+  is_broker: number;
+  is_eligible_for_rent: number;
+  is_locked: number;
+  delivery_date?: string;
+  contracting_date?: string;
+  unit_specifications: {
+    unit_type_id: number;
+    location_id: number;
+    total_area: number;
+    is_furnished: number;
+    address?: string;
+    floor?: number;
+    room_no?: number;
+    path_room_no?: number;
+    living_room_no?: number;
+    balcony_no?: number;
+  };
+}
+
+/**
+ * Creates one unit with its specification. The API answers 409
+ * `ALREADY_EXISTS` for a unit number already in that sub-project, and 400
+ * `INVALID_SUB_PROJECT` for a sub-project outside the sign-in project.
+ */
+export async function createUnit(
+  payload: CreateUnitPayload,
+): Promise<{ unitId: number | null }> {
+  const response = await api.post<{ result?: { unit_id?: unknown } | null }>(
+    '/projects/unit',
+    payload,
+  );
+  const unitId = response.data?.result?.unit_id;
+  return { unitId: typeof unitId === 'number' ? unitId : null };
 }
 
 export async function updateUnit(

@@ -2280,7 +2280,10 @@
     "INVALID_DATA_PROVIDED": "بعض البيانات غير صحيحة.",
     "UNIT_ALREADY_HAS_BLOCK": "هذه الوحدة عليها حظر نشط بالفعل.",
     "SUPPORT_NOT_CONFIGURED": "التواصل مع الدعم غير متاح لحسابك بعد.",
-    "SUPPORT_REQUEST_NOT_SENT": "تعذر إرسال طلبك. يرجى المحاولة مرة أخرى بعد بضع دقائق."
+    "SUPPORT_REQUEST_NOT_SENT": "تعذر إرسال طلبك. يرجى المحاولة مرة أخرى بعد بضع دقائق.",
+    "INVALID_SUB_PROJECT": "اختر مشروعاً فرعياً من هذا المشروع.",
+    "UNIT_NOT_FOUND": "لم يتم العثور على الوحدة في هذا المشروع.",
+    "RELATIVE_ALREADY_ON_UNIT": "هذا الشخص مسجل بالفعل على هذه الوحدة."
   },
   "imports": {
     "fileLabel": "ملف Excel",
@@ -2304,7 +2307,7 @@
     "units": {
       "title": "استيراد الوحدات",
       "description": "ارفع ملفاً بالوحدات لإضافتها إلى النظام.",
-      "columns": "وفق قالب الوحدات المرسل من مسؤول النظام"
+      "columns": "unit_number (إلزامي)، و unit_type و area و floor و sub_project (رمز المشروع الفرعي) و address. الوحدة المسجلة من قبل تُتخطى ولا تُعدّل."
     },
     "customers": {
       "title": "استيراد العملاء",
@@ -2314,7 +2317,7 @@
     "relatives": {
       "title": "استيراد الأقارب",
       "description": "ارفع ملفاً بأقارب الملاك.",
-      "columns": "وفق قالب الأقارب المرسل من مسؤول النظام"
+      "columns": "owner_id_number و unit_number و relative_name و relative_id_number (إلزامية)، و relation و mobile و email و id_type (بطاقة رقم قومي أو جواز سفر) و is_male (1 أو 0) و sub_project. يجب أن يكون المالك حائزاً للوحدة بالفعل."
     },
     "unit-debts": {
       "title": "استيراد مديونيات الوحدات",
@@ -2326,7 +2329,7 @@
       "refresh": "تحديث",
       "loading": "جارٍ التحميل…",
       "loadError": "تعذر تحميل سجل الاستيراد.",
-      "downloadErrors": "الصفوف المرفوضة (CSV)",
+      "downloadErrors": "الصفوف المرفوضة",
       "columns": {
         "id": "الرقم",
         "kind": "النوع",
@@ -2335,6 +2338,106 @@
         "createdBy": "رفعه",
         "createdAt": "وقت الرفع",
         "errors": "الصفوف المرفوضة"
+      }
+    },
+    "template": {
+      "download": "تنزيل القالب",
+      "downloading": "جارٍ التنزيل…",
+      "hint": "ملف Excel فارغ بالأعمدة المذكورة أعلاه، والإلزامية أولاً."
+    },
+    "entry": {
+      "save": "إضافة",
+      "saving": "جارٍ الإضافة…",
+      "reset": "مسح",
+      "cancel": "إلغاء",
+      "required": "هذا الحقل مطلوب.",
+      "tooLong": "القيمة أطول من المسموح.",
+      "wholeNumber": "أدخل عدداً صحيحاً.",
+      "nonNegativeNumber": "أدخل رقماً يساوي 0 أو أكثر.",
+      "invalidEmail": "أدخل بريداً إلكترونياً صحيحاً.",
+      "invalidPhone": "أدخل رقم هاتف صحيحاً (من 8 إلى 15 رقماً).",
+      "nationalIdFormat": "الرقم القومي مكون من 14 رقماً.",
+      "passportFormat": "رقم جواز السفر من 6 إلى 20 حرفاً أو رقماً.",
+      "idNumberLength": "يجب أن يكون رقم الهوية من 5 إلى 50 حرفاً.",
+      "endBeforeStart": "لا يمكن أن يسبق تاريخ الانتهاء تاريخ البدء.",
+      "unitNotFound": "لا توجد وحدة رقم {unit} في هذا المشروع. أضف الوحدة أولاً.",
+      "unitNotInSubProject": "لا توجد وحدة رقم {unit} في المشروع الفرعي {subProject}.",
+      "unitAmbiguous": "توجد عدة وحدات بالرقم {unit}. اختر المشروع الفرعي.",
+      "units": {
+        "title": "إضافة وحدة يدوياً",
+        "description": "تضيف وحدة واحدة إلى هذا المشروع مع مواصفاتها. يُرفض رقم وحدة مستخدم من قبل في المشروع الفرعي نفسه.",
+        "unitNumber": "رقم الوحدة",
+        "subProject": "المشروع الفرعي",
+        "noSubProject": "بدون مشروع فرعي",
+        "unitType": "نوع الوحدة",
+        "location": "الموقع",
+        "totalArea": "المساحة الإجمالية",
+        "floor": "الطابق",
+        "address": "العنوان",
+        "rooms": "الغرف",
+        "bathrooms": "دورات المياه",
+        "livingRooms": "غرف المعيشة",
+        "balconies": "الشرفات",
+        "deliveryDate": "تاريخ التسليم",
+        "contractingDate": "تاريخ التعاقد",
+        "notes": "ملاحظات",
+        "isActive": "نشطة",
+        "isEligibleForRent": "متاحة للإيجار",
+        "isFurnished": "مفروشة",
+        "isBroker": "وسيط",
+        "saved": "تمت إضافة الوحدة {unit}."
+      },
+      "customers": {
+        "title": "إضافة عميل يدوياً",
+        "description": "تضيف عميلاً واحداً وتربطه بوحدة موجودة بالفعل. العميل الموجود في هذا المشروع يُربط بالوحدة ولا يُضاف مرة أخرى.",
+        "customerName": "اسم العميل",
+        "idType": "نوع الهوية",
+        "idNumber": "رقم الهوية",
+        "country": "الدولة",
+        "maritalStatus": "الحالة الاجتماعية",
+        "religion": "الديانة",
+        "customerType": "نوع العميل",
+        "mobile": "الهاتف المحمول",
+        "email": "البريد الإلكتروني",
+        "customerCode": "كود العميل",
+        "unitNumber": "رقم الوحدة",
+        "subProject": "المشروع الفرعي",
+        "anySubProject": "المشروع الفرعي للوحدة، إن لم تحمل هذا الرقم إلا وحدة واحدة",
+        "ownership": "نوع الحيازة",
+        "ownerType": "نوع المالك",
+        "ownerTypeDefault": "مالك",
+        "contractNumber": "رقم العقد",
+        "startDate": "تاريخ البدء",
+        "signDate": "تاريخ التوقيع (افتراضياً: تاريخ البدء)",
+        "endDate": "تاريخ الانتهاء",
+        "saved": "تمت إضافة {name} وربطه بالوحدة {unit}.",
+        "linked": "تم ربط الوحدة {unit} بـ {name}.",
+        "createdNotLinked": "تمت إضافة {name} لكن لم تُربط الوحدة {unit}. أصلح المشكلة وأضف مرة أخرى: ستُربط الوحدة بهذا العميل.",
+        "ownerTypeNotSet": "تم ربط الوحدة {unit} بـ {name} كمالك، لكن لم يُحدد نوع المالك. غيّره من حيازات الوحدة.",
+        "existingTitle": "العميل موجود في هذا المشروع",
+        "existingMessage": "{name} مسجل بهذا الرقم بالفعل. هل تريد ربط الوحدة {unit} به؟ تبقى بياناته كما هي.",
+        "linkExisting": "ربط الوحدة"
+      },
+      "relatives": {
+        "title": "إضافة قريب يدوياً",
+        "description": "تضيف قريباً واحداً إلى وحدة يحوزها المالك، بالفحوص نفسها التي يطبقها ملف الأقارب. العميل المسجل برقم هوية القريب يُربط كما هو.",
+        "ownerIdNumber": "رقم هوية المالك",
+        "unitNumber": "رقم الوحدة",
+        "subProject": "المشروع الفرعي",
+        "anySubProject": "المشروع الفرعي للوحدة، إن لم تحمل هذا الرقم إلا وحدة واحدة",
+        "relativeName": "اسم القريب",
+        "idType": "نوع الهوية",
+        "idTypeDefault": "بطاقة رقم قومي",
+        "relativeIdNumber": "رقم هوية القريب",
+        "gender": "النوع",
+        "male": "ذكر",
+        "female": "أنثى",
+        "relation": "صلة القرابة",
+        "mobile": "الهاتف المحمول",
+        "email": "البريد الإلكتروني",
+        "sameAsOwner": "لا يمكن أن يحمل القريب رقم هوية المالك.",
+        "ownerNotFound": "لا يوجد عميل برقم الهوية {idNumber} في هذا المشروع. أضف المالك أولاً.",
+        "saved": "تمت إضافة {name} كقريب لـ {owner} على الوحدة {unit}."
       }
     }
   },
