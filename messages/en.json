@@ -1630,6 +1630,24 @@
     "sentReplyTo": "Ability-Tech's support team will answer at <strong>{email}</strong>.",
     "sentNoEmail": "Your account has no email address, so the team can't answer by email. Ask your administrator to add one to your account."
   },
+  "assistant": {
+    "title": "CRM Assistant",
+    "open": "Open CRM assistant",
+    "close": "Close",
+    "newChat": "New chat",
+    "newChatConfirm": "Start a new chat? The current one can't be reopened.",
+    "welcome": "I can help you with how to use the CRM screens. What would you like to do?",
+    "placeholder": "Ask how to do something in the CRM…",
+    "inputLabel": "Message to the CRM assistant",
+    "send": "Send",
+    "writing": "Writing the answer…",
+    "unavailable": "The CRM assistant is temporarily unavailable. Please try again in a few minutes.",
+    "retry": "Try again",
+    "tooLong": "Your message is too long ({max} characters maximum).",
+    "counter": "{count} / {max}",
+    "you": "You",
+    "assistant": "Assistant"
+  },
   "notFound": {
     "title": "Page Not Found",
     "message": "The page you are looking for does not exist or has been moved.",

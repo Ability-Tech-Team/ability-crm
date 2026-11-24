@@ -86,6 +86,17 @@ the workspace instead of assuming it exists.
     e.g. `/definitions/erp-codes`).
   - The API enforces sessions and privileges on every call; the menus and
     hidden buttons are presentation.
+- **CRM assistant chat (2026-11-24; `../AGENTS.md`, The CRM assistant):**
+  `src/components/assistant/` (the floating button, mounted once in
+  `AppShell`, and the panel, loaded on first open), `src/hooks/useAssistantChat.ts`,
+  `src/lib/assistantChat.ts` (state, `sessionStorage` under
+  `crm-assistant:<employee id>`, cleared on logout, answer formatting),
+  `src/services/assistant.ts` (the browser's call to this app's own route),
+  and `src/app/api/assistant/chat/route.ts` with `src/lib/assistantProxy.ts`
+  (server-only: the menu from `GET /roles/get-role-privileges` in English with
+  the employee's `access_token`, then `POST {CRM_ASSISTANT_URL}/chat`). The
+  browser never sends or sees the user id, the menu, or the assistant's
+  address. Answers are text: never render them as HTML.
 - **Structure:** Amer CRM's layout (route-colocated `hooks/`, `components/`,
   `schema.ts`, `types.ts`, `utils.ts`; entity API operations in
   `src/services/`; HTTP client and configuration in `src/lib/`). Effects that
@@ -99,8 +110,9 @@ the workspace instead of assuming it exists.
   default; Arabic renders right-to-left. This app owns `messages/en.json` and
   `messages/ar.json`; `apiCodes` holds the wording for API `message_code`s.
 - **Environment** (`.env.example`): `API_ALLOWED_URLS` (the Ability CRM API
-  addresses accepted from the sign-in), `PORTAL_URL`, and
-  `MEDIA_ALLOWED_HOSTS`, all server-only and read at runtime. Never reuse
+  addresses accepted from the sign-in), `PORTAL_URL`, `MEDIA_ALLOWED_HOSTS`,
+  and `CRM_ASSISTANT_URL` (the assistant service), all server-only and read
+  at runtime. Never reuse
   Amer CRM's API URL, cookies, or credentials. Document new keys in
   `.env.example` with placeholder values.
 - **Container** (README.md, Container): `Dockerfile` (the standalone server,
@@ -117,7 +129,8 @@ the workspace instead of assuming it exists.
   session cookie and its API address, the trusted-address check, route rules
   and the sidebar, refund actions, ownership payloads, phone input, imports,
   unit debt, logo addresses, base URLs, the log filters, support
-  requests, and the Imports screens' manual entry forms.
+  requests, the Imports screens' manual entry forms, and the assistant chat
+  (state, storage, answers, the route's identity and failure handling).
 
 Commands, from this directory (details in `README.md`):
 

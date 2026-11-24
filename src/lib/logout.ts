@@ -1,5 +1,6 @@
 import api from './http';
 import { useSessionStore } from '../store/useSessionStore';
+import { browserSessionStorage, clearAssistantChats } from './assistantChat';
 
 export const LOGOUT_ENDPOINT = '/auth/logout';
 
@@ -15,6 +16,14 @@ export async function logoutAndClearSession(): Promise<void> {
   } catch {
     // Leaving the app is what the user asked for.
   } finally {
+    // The next employee to sign in on this tab must not see this one's
+    // assistant chat.
+    try {
+      const storage = browserSessionStorage();
+      if (storage) clearAssistantChats(storage);
+    } catch {
+      // Blocked storage holds no chat.
+    }
     useSessionStore.getState().markSessionEnded('signed_out');
   }
 }
