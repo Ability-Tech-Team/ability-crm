@@ -19,8 +19,11 @@ const ACCEPTED_TYPES =
 
 type ImportUploadPageProps = {
   kind: ImportKind;
-  /** The screen's menu href, e.g. `/imports/units`. */
-  href: string;
+  /**
+   * The screen's menu href, e.g. `/imports/units`, or the hrefs any one of
+   * which opens it (`UNIT_DEBTS_IMPORT_ACCESS_HREFS`).
+   */
+  href: string | string[];
   /** The manual entry form, shown under the upload to whoever can open the screen. */
   children?: React.ReactNode;
 };

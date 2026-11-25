@@ -61,6 +61,24 @@ describe('canAccessAppPath', () => {
     expect(canAccessAppPath('/imports/units', indexes)).toBe(false);
   });
 
+  it('opens Import Unit Debts for whoever has another import sheet screen', () => {
+    expect(canAccessAppPath('/imports/unit-debts', indexes)).toBe(true);
+    expect(canAccessAppPath('/ar/imports/unit-debts', indexes)).toBe(true);
+
+    // Import History alone is not an import sheet screen.
+    const historyOnly = buildCurrentUserPrivilegeIndexes([
+      {
+        id: 90,
+        menuName: 'Imports',
+        menuitems: [
+          { id: 92, name: 'History', href: '/imports/history', privileges: [active(PRIVILEGE_IDS.READ, 'Read')] },
+        ],
+      },
+    ]);
+    expect(canAccessAppPath('/imports/unit-debts', historyOnly)).toBe(false);
+    expect(canAccessAppPath('/imports/unit-debts', buildCurrentUserPrivilegeIndexes([]))).toBe(false);
+  });
+
   it('opens the logs search the role has', () => {
     expect(canAccessAppPath('/logs/search', indexes)).toBe(true);
     expect(canAccessAppPath('/ar/logs/search', indexes)).toBe(true);
@@ -82,7 +100,8 @@ describe('canAccessAppPath', () => {
 });
 
 describe('buildSidebarMenu', () => {
-  const items = buildSidebarMenu(MENUS);
+  const labels = { importUnitDebts: 'Import Unit Debts' };
+  const items = buildSidebarMenu(MENUS, labels);
 
   it('shows only screens with an active privilege', () => {
     const definitions = items.find((item) => item.id === '3');
@@ -102,12 +121,42 @@ describe('buildSidebarMenu', () => {
     expect(canAccessAppPath('/definitions/erp-codes', indexes)).toBe(true);
   });
 
-  it('groups menus with several screens', () => {
+  it('groups menus with several screens, adding Import Unit Debts before the history', () => {
     const imports = items.find((item) => item.id === '90');
     expect(imports?.subItems?.map((sub) => sub.href)).toEqual([
       '/imports/customers',
+      '/imports/unit-debts',
       '/imports/history',
     ]);
+    expect(imports?.subItems?.[1]).toMatchObject({
+      id: '90-unit-debts',
+      label: 'Import Unit Debts',
+    });
+  });
+
+  it('lists Import Unit Debts once when the role has its menu item', () => {
+    const withItem = buildSidebarMenu(
+      [
+        {
+          id: 90,
+          menuName: 'Imports',
+          menuitems: [
+            { id: 91, name: 'Import Customers', href: '/imports/customers', privileges: [active(66, 'Import')] },
+            { id: 143, name: 'Import Unit Debts', href: '/imports/unit-debts', privileges: [active(66, 'Import')] },
+          ],
+        },
+      ],
+      labels,
+    );
+    expect(withItem[0].subItems?.map((sub) => sub.id)).toEqual(['90-91', '90-143']);
+  });
+
+  it('adds Import Unit Debts to no menu without an import sheet screen', () => {
+    const hrefs = buildSidebarMenu(MENUS.filter((menu) => menu.id !== 90), labels).flatMap((item) => [
+      item.href,
+      ...(item.subItems?.map((sub) => sub.href) ?? []),
+    ]);
+    expect(hrefs).not.toContain('/imports/unit-debts');
   });
 
   it('recognizes the Logs and Imports menus by their screens, not their ids', () => {

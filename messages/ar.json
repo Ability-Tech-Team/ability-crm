@@ -58,7 +58,8 @@
     "users": "المستخدمون",
     "roles": "الصلاحيات",
     "tickets": "التذاكر",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "importUnitDebts": "استيراد مديونيات الوحدات"
   },
   "dashboard": {
     "title": "لوحة التحكم",

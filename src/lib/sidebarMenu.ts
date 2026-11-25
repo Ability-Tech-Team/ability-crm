@@ -17,7 +17,12 @@ import {
   ScrollText,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { hasActivePrivileges } from '@/src/lib/currentUserPrivileges';
+import {
+  hasActivePrivileges,
+  normalizeAppPathname,
+  UNIT_DEBTS_IMPORT_ACCESS_HREFS,
+  UNIT_DEBTS_IMPORT_HREF,
+} from '@/src/lib/currentUserPrivileges';
 import type { RoleMenu, RoleMenuItem } from '@/src/types/rolePrivileges';
 import type { SidebarItem, SidebarSubItem } from '@/src/types/sidebar';
 
@@ -104,6 +109,41 @@ const isShownOnMenu = (
   !HIDDEN_MENU_HREFS.has(item.href ?? '') &&
   hasActivePrivileges(item);
 
+/** Labels for the screens the menu adds itself, in the current language. */
+export type SidebarLabels = { importUnitDebts: string };
+
+/** A screen as the menu lists it. */
+type ShownItem = { key: string; name: string; href: string };
+
+/**
+ * The menu's screens to show. Import Unit Debts needs no grant of its own
+ * (`UNIT_DEBTS_IMPORT_ACCESS_HREFS`), so the menu holding another import
+ * sheet screen gets it, before Import History, when the role lacks the item.
+ */
+const shownItems = (menu: RoleMenu, labels: SidebarLabels): ShownItem[] => {
+  const items: ShownItem[] = (menu.menuitems ?? [])
+    .filter(isShownOnMenu)
+    .map((item) => ({ key: String(item.id), name: item.name, href: item.href }));
+
+  const hrefs = new Set(items.map((item) => normalizeAppPathname(item.href)));
+  const grantsUnitDebts = UNIT_DEBTS_IMPORT_ACCESS_HREFS.some((href) =>
+    hrefs.has(href),
+  );
+  if (!hrefs.has(UNIT_DEBTS_IMPORT_HREF) && grantsUnitDebts) {
+    const unitDebts: ShownItem = {
+      key: 'unit-debts',
+      name: labels.importUnitDebts,
+      href: UNIT_DEBTS_IMPORT_HREF,
+    };
+    const historyAt = items.findIndex(
+      (item) => normalizeAppPathname(item.href) === '/imports/history',
+    );
+    items.splice(historyAt === -1 ? items.length : historyAt, 0, unitDebts);
+  }
+
+  return items;
+};
+
 /**
  * Sub-item order for one menu, by href. A menu not listed here keeps the
  * backend's order untouched, and so does any href the list omits — those
@@ -131,34 +171,38 @@ const orderSubItems = (
   return [...subItems].sort((a, b) => rank(a.href) - rank(b.href));
 };
 
-const buildSubItems = (menu: RoleMenu): SidebarSubItem[] => {
-  if (!menu.menuitems?.length) return [];
-
+const buildSubItems = (
+  menuId: number,
+  items: ShownItem[],
+): SidebarSubItem[] => {
   const subItems: SidebarSubItem[] = [];
   const seenHrefs = new Set<string>();
 
-  for (const item of menu.menuitems) {
-    if (!isShownOnMenu(item) || seenHrefs.has(item.href)) continue;
+  for (const item of items) {
+    if (seenHrefs.has(item.href)) continue;
 
     seenHrefs.add(item.href);
     subItems.push({
-      id: `${menu.id}-${item.id}`,
+      id: `${menuId}-${item.key}`,
       label: item.name,
       icon: SUB_ITEM_ICON,
       href: item.href,
     });
   }
 
-  return orderSubItems(menu.id, subItems);
+  return orderSubItems(menuId, subItems);
 };
 
-export const buildSidebarMenu = (menus: RoleMenu[]): SidebarItem[] => {
+export const buildSidebarMenu = (
+  menus: RoleMenu[],
+  labels: SidebarLabels,
+): SidebarItem[] => {
   const items: SidebarItem[] = [];
 
   for (const menu of applyMenuPlacements(menus)) {
     const icon =
       MENU_ICON_MAP[menu.id] ?? iconForMenuHrefs(menu) ?? FALLBACK_ICON;
-    const menuItems = menu.menuitems?.filter(isShownOnMenu) ?? [];
+    const menuItems = shownItems(menu, labels);
 
     // Single menu item → render as a direct link
     if (menuItems.length === 1) {
@@ -172,7 +216,7 @@ export const buildSidebarMenu = (menus: RoleMenu[]): SidebarItem[] => {
     }
 
     // Multiple menu items → render as expandable parent with sub-items
-    const subItems = buildSubItems(menu);
+    const subItems = buildSubItems(menu.id, menuItems);
     if (subItems.length) {
       items.push({
         id: String(menu.id),

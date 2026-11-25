@@ -99,6 +99,21 @@ const PRIVILEGE_NAME_FALLBACKS: Partial<Record<number, string[]>> = {
   [PRIVILEGE_IDS.UNBLOCK]: ['unblock'],
 };
 
+export const UNIT_DEBTS_IMPORT_HREF = '/imports/unit-debts';
+
+/**
+ * Import Unit Debts needs no grant of its own (the user's decision,
+ * 2026-11-25): whoever can open one of the other import sheet screens opens
+ * it too, and the sidebar lists it for them. Like those screens, its API
+ * routes check no privilege. Its own menu item still opens it.
+ */
+export const UNIT_DEBTS_IMPORT_ACCESS_HREFS = [
+  UNIT_DEBTS_IMPORT_HREF,
+  '/imports/units',
+  '/imports/customers',
+  '/imports/relatives',
+];
+
 export const APP_ROUTE_ACCESS_RULES: AppRouteAccessRule[] = [
   // Bare `/dashboard` server-redirects to a sub-tab; allow it whenever the
   // user has access to ANY of the new dashboard menu items.
@@ -169,7 +184,10 @@ export const APP_ROUTE_ACCESS_RULES: AppRouteAccessRule[] = [
   { pattern: '/imports/units', allowedHrefs: ['/imports/units'] },
   { pattern: '/imports/customers', allowedHrefs: ['/imports/customers'] },
   { pattern: '/imports/relatives', allowedHrefs: ['/imports/relatives'] },
-  { pattern: '/imports/unit-debts', allowedHrefs: ['/imports/unit-debts'] },
+  {
+    pattern: UNIT_DEBTS_IMPORT_HREF,
+    allowedHrefs: UNIT_DEBTS_IMPORT_ACCESS_HREFS,
+  },
   { pattern: '/imports/history', allowedHrefs: ['/imports/history'] },
 
   { pattern: '/complaints/add', allowedHrefs: ['/complaints/add'] },

@@ -58,7 +58,8 @@
     "users": "Users",
     "roles": "Roles",
     "tickets": "Tickets",
-    "settings": "Settings"
+    "settings": "Settings",
+    "importUnitDebts": "Import Unit Debts"
   },
   "dashboard": {
     "title": "Dashboard",
