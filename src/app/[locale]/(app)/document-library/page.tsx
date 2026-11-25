@@ -11,6 +11,8 @@ import FilePreviewDialog from '@/src/components/ui/FilePreviewDialog';
 import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import { getUnitMedia, type MediaItem } from '@/src/services/documentLibrary';
 import { downloadFile } from '@/src/lib/downloadFile';
@@ -37,6 +39,8 @@ type SearchFormData = z.infer<typeof searchSchema>;
 export default function DocumentLibraryPage() {
   const t = useTranslations('documentLibrary');
   const tForm = useTranslations('form');
+  // The Super Admin's Project filter (src/lib/projectFilter.ts); hidden for everyone else.
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const { error: showError } = useResponseMessage();
   const documentPrivileges = useRoutePrivileges('/document-library');
@@ -82,9 +86,7 @@ export default function DocumentLibraryPage() {
       try {
         const data = await getUnitMedia(
           {
-            project_id: params.project_id
-              ? Number(params.project_id)
-              : undefined,
+            project_id: projectFilterParam(params.project_id),
             unit_number: params.unit_number || undefined,
             media_type_id: params.media_type_id
               ? Number(params.media_type_id)
@@ -154,9 +156,7 @@ export default function DocumentLibraryPage() {
     () =>
       searchParams
         ? {
-            project_id: searchParams.project_id
-              ? Number(searchParams.project_id)
-              : undefined,
+            project_id: projectFilterParam(searchParams.project_id),
             unit_number: searchParams.unit_number || undefined,
             media_type_id: searchParams.media_type_id
               ? Number(searchParams.media_type_id)
@@ -179,6 +179,7 @@ export default function DocumentLibraryPage() {
 
   // ── Form fields & buttons ────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'media_type_id',
       label: tForm('mediaType'),
@@ -363,7 +364,7 @@ export default function DocumentLibraryPage() {
         fields={fields}
         buttons={buttons}
         initialValues={{
-          project_id: '',
+          project_id: projectFilter.initialValue,
           unit_number: '',
           media_type_id: '',
           file_name: '',

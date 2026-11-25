@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -160,7 +161,8 @@ export async function getUnits(
       ...(params.is_exact !== undefined
         ? { is_exact: params.is_exact ? 1 : 0 }
         : {}),
-      ...(params.project_id ? { project_id: params.project_id } : {}),
+      // Required from the Super Admin (src/lib/projectScope.ts).
+      ...projectScopeParam(params.project_id),
       ...(params.is_active !== undefined
         ? { is_active: params.is_active }
         : {}),
@@ -256,6 +258,8 @@ export interface UpdateUnitPayload {
 /** `POST /projects/unit`, into the sign-in project (`ability-crm-api/apps/crm-api/src/units`). */
 export interface CreateUnitPayload {
   unit_number: string;
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   sub_project_id?: number;
   notes?: string;
   is_active: number;
@@ -288,7 +292,7 @@ export async function createUnit(
 ): Promise<{ unitId: number | null }> {
   const response = await api.post<{ result?: { unit_id?: unknown } | null }>(
     '/projects/unit',
-    payload,
+    { ...payload, ...projectScopeParam(payload.project_id) },
   );
   const unitId = response.data?.result?.unit_id;
   return { unitId: typeof unitId === 'number' ? unitId : null };
@@ -298,7 +302,11 @@ export async function updateUnit(
   unitId: number,
   payload: UpdateUnitPayload,
 ): Promise<void> {
-  await api.post(`/projects/units/update/${unitId}`, payload);
+  // The Super Admin names the unit's project (callers pass it when they hold the unit).
+  await api.post(`/projects/units/update/${unitId}`, {
+    ...payload,
+    ...projectScopeParam(payload.project_id),
+  });
 }
 
 // ─── Ownership History ──────────────────────────────────────
@@ -340,6 +348,8 @@ export async function getOwnershipHistory(
     page?: number;
     limit?: number;
     ownership_id?: number;
+    /** The unit's project; the Super Admin must name one. */
+    project_id?: number;
   } = {},
   signal?: AbortSignal,
 ): Promise<GetOwnershipHistoryResponse> {
@@ -351,6 +361,7 @@ export async function getOwnershipHistory(
         limit: params.limit ?? 10,
         ...(params.unit_id ? { unit_id: params.unit_id } : {}),
         ...(params.ownership_id ? { ownership_id: params.ownership_id } : {}),
+        ...projectScopeParam(params.project_id),
       },
       signal,
     },
@@ -418,7 +429,10 @@ export async function setUnitDebt(
 ): Promise<SavedUnitDebt> {
   const response = await api.post<{
     result?: { debit_amount?: unknown; debt_updated_at?: unknown } | null;
-  }>(`/projects/units/debt/${unitId}`, { debit_amount: debitAmount });
+  }>(`/projects/units/debt/${unitId}`, {
+    debit_amount: debitAmount,
+    ...projectScopeParam(),
+  });
   const result = response.data?.result;
   const amount = result?.debit_amount;
   return {

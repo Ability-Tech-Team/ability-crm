@@ -59,7 +59,9 @@
     "roles": "Roles",
     "tickets": "Tickets",
     "settings": "Settings",
-    "importUnitDebts": "Import Unit Debts"
+    "importUnitDebts": "Import Unit Debts",
+    "projects": "Projects",
+    "subProjects": "Sub-projects"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1358,7 +1360,9 @@
     "female": "Female",
     "yes": "Yes",
     "no": "No",
-    "results": "Results"
+    "results": "Results",
+    "projectRequired": "Choose the project the user works in.",
+    "roleNotInProject": "Choose a role of this project."
   },
   "roles": {
     "title": "Roles",
@@ -2302,7 +2306,20 @@
     "SUPPORT_REQUEST_NOT_SENT": "Your request couldn't be sent. Please try again in a few minutes.",
     "INVALID_SUB_PROJECT": "Choose a sub-project of this project.",
     "UNIT_NOT_FOUND": "The unit wasn’t found in this project.",
-    "RELATIVE_ALREADY_ON_UNIT": "This person is already registered on this unit."
+    "RELATIVE_ALREADY_ON_UNIT": "This person is already registered on this unit.",
+    "PROJECT_ALREADY_EXISTS": "A project with these codes and this name already exists.",
+    "PROJECT_NOT_FOUND": "The project wasn't found.",
+    "PROJECT_NOT_ACTIVE": "The project isn't active.",
+    "MAIN_PROJECT_CANNOT_BE_DEACTIVATED": "The main project can't be turned off.",
+    "PROJECT_HAS_ACTIVE_RESIDENTS": "This project still has active residents, so it can't be turned off.",
+    "PROJECT_HAS_OPEN_TICKETS": "This project still has open tickets, so it can't be turned off.",
+    "PROJECT_HAS_OPEN_INVOICES": "This project still has open invoices, so it can't be turned off.",
+    "SUB_PROJECT_ALREADY_EXISTS": "This project already has a sub-project with this code.",
+    "SUB_PROJECT_NOT_FOUND": "The sub-project wasn't found.",
+    "DEFAULT_SUB_PROJECT_REQUIRED": "The default sub-project can't be turned off or deleted.",
+    "SUB_PROJECT_HAS_UNITS": "This sub-project still has units, so it can't be turned off or deleted.",
+    "SUB_PROJECT_HAS_CUSTOMERS": "This sub-project still has customers, so it can't be turned off or deleted.",
+    "ROLE_NOT_IN_PROJECT": "The role doesn't belong to the user's project. Choose a role of that project."
   },
   "imports": {
     "fileLabel": "Excel sheet",
@@ -2488,5 +2505,23 @@
       "module": "Module",
       "action": "Action"
     }
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "The client's projects. Only the Super Admin manages them; every other employee works in their own project.",
+    "companyCode": "Company code",
+    "projectCode": "Project code",
+    "projectCodeFixed": "Project code (can't be changed)",
+    "totalUnits": "Units",
+    "occupancy": "Occupancy",
+    "deactivateConfirm": "Mark \"{name}\" as inactive? A project with active residents, open tickets, or open invoices can't be turned off."
+  },
+  "subProjects": {
+    "title": "Sub-projects",
+    "description": "Each project's sub-projects. Units belong to one, and the import sheets name it by its code.",
+    "project": "Project",
+    "code": "Code",
+    "default": "Default",
+    "searchPlaceholder": "Search by code or name..."
   }
 }

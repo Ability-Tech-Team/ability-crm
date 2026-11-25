@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 import { getContactChannelPayload } from '@/src/lib/contactChannel';
 
 // ─── Types ───────────────────────────────────────────────────
@@ -81,7 +82,7 @@ export async function getInquiries(
       ...(params.requester_mobile
         ? { requester_mobile: params.requester_mobile }
         : {}),
-      ...(params.project_id ? { project_id: params.project_id } : {}),
+      ...projectScopeParam(params.project_id),
       ...getContactChannelPayload(params.contact_channel_id),
       ...(params.from_date ? { from_date: params.from_date } : {}),
       ...(params.to_date ? { to_date: params.to_date } : {}),

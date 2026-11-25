@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -68,7 +69,7 @@ export async function getLegalEmployees(
         ...(params.is_active !== undefined
           ? { is_active: params.is_active }
           : {}),
-        ...(params.project_id ? { project_id: params.project_id } : {}),
+        ...projectScopeParam(params.project_id),
         page: params.page ?? 1,
         limit: params.limit ?? 10,
       },

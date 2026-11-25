@@ -14,6 +14,8 @@ export interface CreateEmployeeDto {
   safe_id?: number;
   employee_type_id?: number;
   manager_id?: string;
+  /** The Super Admin only: the project the new user works in (the role must belong to it). */
+  project_id?: number;
 }
 
 export interface UpdateEmployeeDto {

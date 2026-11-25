@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 import { getContactChannelPayload } from '@/src/lib/contactChannel';
 import { pickLocalizedSnapshot } from '@/src/services/tickets';
 
@@ -181,7 +182,7 @@ export async function getComplaints(
       ...(params.unit_id ? { unit_id: params.unit_id } : {}),
       ...(params.from_date ? { from_date: params.from_date } : {}),
       ...(params.to_date ? { to_date: params.to_date } : {}),
-      ...(params.project_id ? { project_id: params.project_id } : {}),
+      ...projectScopeParam(params.project_id),
       ...(params.request_from_id
         ? { request_from_id: params.request_from_id }
         : {}),
@@ -318,7 +319,7 @@ export async function getComplaintNotifications(
     '/orders/complain-notifications',
     {
       params: {
-        ...(params.project_id ? { project_id: params.project_id } : {}),
+        ...projectScopeParam(params.project_id),
         page: String(params.page ?? 1),
         limit: String(params.limit ?? 10),
       },

@@ -19,10 +19,13 @@ import {
   type Complaint,
 } from '@/src/services/complaints';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 
 const LIMIT = 10;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   department_id: z.string().optional(),
   type_id: z.string().optional(),
   status_id: z.string().optional(),
@@ -82,6 +85,7 @@ function getStatusBadgeClass(statusName?: string | null): string {
 export default function ComplaintsSearch() {
   const t = useTranslations('complaints');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const { success: showSuccess, error: showError } = useResponseMessage();
   const complaintsSearchPrivileges = useRoutePrivileges('/complaints/search');
@@ -182,6 +186,7 @@ export default function ComplaintsSearch() {
       try {
         const data = await getComplaints(
           {
+            project_id: projectFilterParam(params.project_id),
             department_id: params.department_id
               ? Number(params.department_id)
               : undefined,
@@ -254,6 +259,7 @@ export default function ComplaintsSearch() {
     () =>
       searchParams
         ? {
+            project_id: projectFilterParam(searchParams.project_id),
             department_id: searchParams.department_id
               ? Number(searchParams.department_id)
               : undefined,
@@ -342,6 +348,7 @@ export default function ComplaintsSearch() {
 
   // ── Form fields & buttons ────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'department_id',
       label: tForm('department'),
@@ -594,6 +601,7 @@ export default function ComplaintsSearch() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           department_id: '',
           type_id: '',
           status_id: '',

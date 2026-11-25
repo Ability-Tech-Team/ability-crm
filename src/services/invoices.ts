@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 import { getContactChannelPayload } from '@/src/lib/contactChannel';
 
 // ─── Types ───────────────────────────────────────────────────
@@ -164,6 +165,8 @@ export interface GetInvoicesResponse {
 }
 
 export interface GetInvoicesParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   ticket_id?: number;
   invoice_number?: string;
   invoice_status_id?: number;
@@ -192,6 +195,7 @@ export async function getInvoices(
 ): Promise<GetInvoicesResponse> {
   const response = await api.get<GetInvoicesRaw>('/orders/invoices', {
     params: {
+      ...projectScopeParam(params.project_id),
       ...(params.ticket_id ? { ticket_id: params.ticket_id } : {}),
       ...(params.invoice_number
         ? { invoice_number: params.invoice_number }
@@ -365,6 +369,8 @@ export async function changeInvoiceStatus(
 // ─── Settlements (refund) ────────────────────────────────────
 
 export interface GetSettlementInvoicesParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   invoice_number?: string;
   invoice_status_id?: number;
   invoice_number_item?: string;
@@ -386,6 +392,7 @@ export async function getSettlementInvoices(
     '/orders/invoices/settlements',
     {
       params: {
+        ...projectScopeParam(params.project_id),
         ...(params.invoice_number
           ? { invoice_number: params.invoice_number }
           : {}),

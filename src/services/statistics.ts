@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 export enum DateType {
   DAILY = 1,
@@ -33,6 +34,8 @@ export interface Statistics {
 }
 
 export interface GetStatisticsParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   date_type: DateType;
   date?: string;
 }
@@ -43,6 +46,7 @@ export async function getStatistics(
 ): Promise<Statistics> {
   const response = await api.get('/orders/statistics', {
     params: {
+      ...projectScopeParam(params.project_id),
       date_type: params.date_type,
       ...(params.date ? { date: params.date } : {}),
     },

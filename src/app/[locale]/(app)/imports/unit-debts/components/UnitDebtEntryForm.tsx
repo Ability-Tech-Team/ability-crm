@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import EgpSign from '@/src/components/EgpSign';
 import Form from '@/src/components/Form';
 import SectionHeader from '@/src/components/SectionHeader';
-import { useDropdowns } from '@/src/hooks/useDropdowns';
 import EntryNotice from '../../_shared/components/EntryNotice';
+import { useSubProjectOptions } from '../../_shared/hooks/useSubProjectOptions';
 import { subProjectCodeOptions } from '../../_shared/utils';
 import { useUnitDebtEntry } from '../hooks/useUnitDebtEntry';
 import { createUnitDebtEntrySchema, getUnitDebtEntryFields } from '../schema';
@@ -15,16 +15,16 @@ import { UNIT_DEBT_ENTRY_INITIAL_VALUES } from '../utils';
 /** Sets one unit's debt by hand, as a row of the unit debts sheet would. */
 export default function UnitDebtEntryForm() {
   const t = useTranslations('imports.entry');
-  const { data: dropdowns } = useDropdowns();
+  const subProjects = useSubProjectOptions();
   const { save, notice, clearNotice, formKey } = useUnitDebtEntry();
 
   const schema = useMemo(() => createUnitDebtEntrySchema(t), [t]);
   const fields = useMemo(
     () =>
       getUnitDebtEntryFields(t, {
-        subProjects: subProjectCodeOptions(dropdowns?.sub_projects),
+        subProjects: subProjectCodeOptions(subProjects),
       }),
-    [dropdowns?.sub_projects, t],
+    [subProjects, t],
   );
 
   return (

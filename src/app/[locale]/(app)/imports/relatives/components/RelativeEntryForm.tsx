@@ -7,6 +7,7 @@ import Form from '@/src/components/Form';
 import SectionHeader from '@/src/components/SectionHeader';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import EntryNotice from '../../_shared/components/EntryNotice';
+import { useSubProjectOptions } from '../../_shared/hooks/useSubProjectOptions';
 import {
   ID_TYPE_NATIONAL_ID,
   ID_TYPE_PASSPORT,
@@ -21,13 +22,14 @@ import { RELATIVE_ENTRY_INITIAL_VALUES } from '../utils';
 export default function RelativeEntryForm() {
   const t = useTranslations('imports.entry');
   const { data: dropdowns } = useDropdowns();
+  const subProjects = useSubProjectOptions();
   const { save, notice, clearNotice, formKey } = useRelativeEntry();
 
   const schema = useMemo(() => createRelativeEntrySchema(t), [t]);
   const fields = useMemo(
     () =>
       getRelativeEntryFields(t, {
-        subProjects: subProjectCodeOptions(dropdowns?.sub_projects),
+        subProjects: subProjectCodeOptions(subProjects),
         // The relatives sheet takes these two ID types only.
         idTypes: toSelectOptions(
           dropdowns?.id_types?.filter((item) =>
@@ -39,7 +41,7 @@ export default function RelativeEntryForm() {
           { value: '0', label: t('relatives.female') },
         ],
       }),
-    [dropdowns?.id_types, dropdowns?.sub_projects, t],
+    [dropdowns?.id_types, subProjects, t],
   );
 
   return (

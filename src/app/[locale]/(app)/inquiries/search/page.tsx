@@ -8,10 +8,13 @@ import DataTable, { ColumnDef } from '@/src/components/ui/DataTable';
 import MainBox from '@/src/components/ui/MainBox';
 import { getInquiries, type Inquiry } from '@/src/services/inquiries';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 
 const LIMIT = 10;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   unit_number: z.string().optional(),
   requester_name: z.string().optional(),
   requester_mobile: z
@@ -29,6 +32,7 @@ type SearchFormData = z.infer<typeof searchSchema>;
 export default function InquiriesSearch() {
   const t = useTranslations('inquiries');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
 
   // ── Search & data state ──────────────────────────────────────
@@ -55,6 +59,7 @@ export default function InquiriesSearch() {
       try {
         const data = await getInquiries(
           {
+            project_id: projectFilterParam(params.project_id),
             unit_number: params.unit_number || undefined,
             requester_name: params.requester_name || undefined,
             requester_mobile: params.requester_mobile || undefined,
@@ -118,6 +123,7 @@ export default function InquiriesSearch() {
     () =>
       searchParams
         ? {
+            project_id: projectFilterParam(searchParams.project_id),
             unit_number: searchParams.unit_number || undefined,
             requester_name: searchParams.requester_name || undefined,
             requester_mobile: searchParams.requester_mobile || undefined,
@@ -142,6 +148,7 @@ export default function InquiriesSearch() {
   );
 
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'unit_number',
       label: tForm('unitNumber'),
@@ -272,6 +279,7 @@ export default function InquiriesSearch() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           unit_number: '',
           requester_name: '',
           requester_mobile: '',

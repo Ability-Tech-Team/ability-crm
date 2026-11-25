@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 import { ApiError, readEnvelopeFailure } from '@/src/lib/apiErrors';
 
 /**
@@ -114,6 +115,9 @@ export async function uploadImport(
 ): Promise<ImportRecord | null> {
   const formData = new FormData();
   formData.append('file', file);
+  // The Super Admin imports into the project they work in (src/lib/projectScope.ts).
+  const projectId = projectScopeParam().project_id;
+  if (projectId) formData.append('project_id', String(projectId));
 
   const response = await api.post<{ result?: unknown }>(
     `/imports/${kind}`,
@@ -132,7 +136,11 @@ export async function getImports(
   signal?: AbortSignal,
 ): Promise<{ imports: ImportRecord[]; totalCount: number }> {
   const response = await api.get<{ result?: unknown }>('/imports', {
-    params: { page: params.page ?? 1, limit: params.limit ?? 10 },
+    params: {
+      page: params.page ?? 1,
+      limit: params.limit ?? 10,
+      ...projectScopeParam(),
+    },
     signal,
   });
   const { items, total } = readList(response.data?.result);
@@ -148,6 +156,7 @@ export async function getImport(
   signal?: AbortSignal,
 ): Promise<ImportRecord | null> {
   const response = await api.get<{ result?: unknown }>(`/imports/${id}`, {
+    params: projectScopeParam(),
     signal,
   });
   return toImportRecord(response.data?.result);
@@ -173,8 +182,9 @@ const XLSX_CONTENT_TYPE =
 /** A download's file, or the API's failure when the answer is a JSON envelope. */
 async function readDownload(
   path: string,
+  params: Record<string, unknown> = {},
 ): Promise<Blob> {
-  const response = await api.get<Blob>(path, { responseType: 'blob' });
+  const response = await api.get<Blob>(path, { params, responseType: 'blob' });
   const blob = response.data;
 
   // A failure still arrives as a JSON envelope.
@@ -210,7 +220,7 @@ export function importErrorsFileName(id: number, contentType: string): string {
 
 /** Saves the file of an import's rejected rows. */
 export async function downloadImportErrors(id: number): Promise<void> {
-  const blob = await readDownload(`/imports/${id}/errors`);
+  const blob = await readDownload(`/imports/${id}/errors`, projectScopeParam());
   const file = blob.type ? blob : new Blob([blob], { type: 'text/csv' });
   saveBlob(file, importErrorsFileName(id, file.type));
 }

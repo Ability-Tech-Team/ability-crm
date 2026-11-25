@@ -26,6 +26,8 @@ export interface MediaUploadContext {
   /** Every upload names its customer (`POST /projects/units/media/upload`). */
   customer_id: number;
   customer_code?: string;
+  /** The unit's project; defaults to the Super Admin's scope. */
+  project_id?: number;
 }
 
 const fileKey = (file: File) =>

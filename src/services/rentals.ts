@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 import type { CustomerUnit, Unit, UnitLocation } from '@/src/services/units';
 
 export const RENTAL_STATUSES = {
@@ -185,6 +186,8 @@ export interface GetRentalsResponse {
 }
 
 export interface GetRentalUnitsParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   unit_number?: string;
   unit_id?: number;
   is_exact?: boolean;
@@ -528,6 +531,7 @@ export async function getRentalUnits(
   try {
     const response = await api.get<GetRentalUnitsRaw>('/rentals/units', {
       params: {
+        ...projectScopeParam(params.project_id),
         ...(params.unit_number ? { unit_number: params.unit_number } : {}),
         ...(params.unit_id ? { unit_id: params.unit_id } : {}),
         ...(params.is_exact !== undefined
@@ -1374,7 +1378,7 @@ export async function getRentals(
           : {}),
         ...(params.unit_number ? { unit_number: params.unit_number } : {}),
         ...(params.unit_id ? { unit_id: params.unit_id } : {}),
-        ...(params.project_id ? { project_id: params.project_id } : {}),
+        ...projectScopeParam(params.project_id),
         page: params.page ?? 1,
         limit: params.limit ?? 10,
       },

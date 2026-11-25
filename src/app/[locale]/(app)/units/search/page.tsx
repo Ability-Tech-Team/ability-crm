@@ -11,6 +11,8 @@ import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import { getUnits, type Unit } from '@/src/services/units';
 import { useSelectedUnitStore } from '@/src/store/useSelectedUnitStore';
 
@@ -33,6 +35,8 @@ type SearchFormData = z.infer<typeof searchSchema>;
 export default function UnitsSearch() {
   const t = useTranslations('units');
   const tForm = useTranslations('form');
+  // The Super Admin's Project filter (src/lib/projectFilter.ts); hidden for everyone else.
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const router = useRouter();
   const { error: showError } = useResponseMessage();
@@ -53,15 +57,6 @@ export default function UnitsSearch() {
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
-
-  const projectOptions = useMemo(
-    () =>
-      (dropdowns?.company_projects ?? []).map((d) => ({
-        value: String(d.id),
-        label: d.name,
-      })),
-    [dropdowns],
-  );
 
   const isActiveOptions = useMemo(
     () => [
@@ -121,9 +116,7 @@ export default function UnitsSearch() {
           {
             unit_number: params.unit_number || undefined,
             is_exact: params.is_exact === '1',
-            project_id: params.project_id
-              ? Number(params.project_id)
-              : undefined,
+            project_id: projectFilterParam(params.project_id),
             is_active:
               params.is_active !== '' ? Number(params.is_active) : undefined,
             is_locked:
@@ -194,9 +187,7 @@ export default function UnitsSearch() {
         ? {
             unit_number: searchParams.unit_number || undefined,
             is_exact: searchParams.is_exact === '1' ? 1 : 0,
-            project_id: searchParams.project_id
-              ? Number(searchParams.project_id)
-              : undefined,
+            project_id: projectFilterParam(searchParams.project_id),
             is_active:
               searchParams.is_active !== ''
                 ? Number(searchParams.is_active)
@@ -231,13 +222,7 @@ export default function UnitsSearch() {
       label: tForm('isExact'),
       fieldType: 'checkbox',
     },
-    {
-      name: 'project_id',
-      label: tForm('project'),
-      placeholder: tForm('project'),
-      fieldType: 'select',
-      options: projectOptions,
-    },
+    ...projectFilter.fields,
     {
       name: 'is_active',
       label: tForm('isActive'),
@@ -464,7 +449,7 @@ export default function UnitsSearch() {
         initialValues={{
           unit_number: '',
           is_exact: '1',
-          project_id: '',
+          project_id: projectFilter.initialValue,
           is_active: '',
           is_locked: '',
           is_furnished: '0',

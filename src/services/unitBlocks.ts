@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -130,7 +131,8 @@ export async function getUnitBlocks(
       ...(params.unit_number ? { unit_number: params.unit_number } : {}),
       ...(params.is_exact ? { is_exact: params.is_exact } : {}),
       ...(params.category_id ? { category_id: params.category_id } : {}),
-      ...(params.project_id ? { project_id: params.project_id } : {}),
+      // Required from the Super Admin (src/lib/projectScope.ts).
+      ...projectScopeParam(params.project_id),
       ...(params.blocked_by ? { blocked_by: params.blocked_by } : {}),
       ...(params.unblocked_by ? { unblocked_by: params.unblocked_by } : {}),
       ...(params.assign_to_id ? { assign_to_id: params.assign_to_id } : {}),
@@ -223,6 +225,8 @@ export function getUnsupportedAttachments(files: File[] = []): string[] {
 
 export interface CreateUnitBlockDto {
   unit_id: number;
+  /** The unit's project; defaults to the Super Admin's scope. */
+  project_id?: number;
   /** Legal blocks only; the form hides the picker for a finance block. */
   category_id?: number;
   is_legal: number;
@@ -246,6 +250,8 @@ export async function createUnitBlock(
   formData.append('is_legal', String(payload.is_legal));
   formData.append('reason', payload.reason);
   formData.append('is_active', String(payload.is_active ?? 1));
+  const createProject = projectScopeParam(payload.project_id).project_id;
+  if (createProject) formData.append('project_id', String(createProject));
 
   if (payload.assign_to_id) {
     formData.append('assign_to_id', payload.assign_to_id);
@@ -269,6 +275,8 @@ export async function createUnitBlock(
 // ─── Update unit block ───────────────────────────────────────
 
 export interface UpdateUnitBlockDto {
+  /** The block's project; defaults to the Super Admin's scope. */
+  project_id?: number;
   reason?: string;
   /** 0 lifts the block: stamps unblocked_by / unblocked_date, unlocks the unit. */
   is_active?: number;
@@ -288,6 +296,8 @@ export async function updateUnitBlock(
   const formData = new FormData();
 
   if (payload.reason !== undefined) formData.append('reason', payload.reason);
+  const updateProject = projectScopeParam(payload.project_id).project_id;
+  if (updateProject) formData.append('project_id', String(updateProject));
   if (payload.is_active !== undefined) {
     formData.append('is_active', String(payload.is_active));
   }

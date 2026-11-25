@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 import { getContactChannelPayload } from '@/src/lib/contactChannel';
 
 // ─── Types ───────────────────────────────────────────────────
@@ -141,6 +142,8 @@ export interface GetTicketsResponse {
 }
 
 export interface GetTicketsParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   department_id?: number;
   ticket_id?: number;
   service_id?: number;
@@ -166,6 +169,7 @@ export async function getTickets(
 ): Promise<GetTicketsResponse> {
   const response = await api.get<GetTicketsRaw>('/orders/tickets', {
     params: {
+      ...projectScopeParam(params.project_id),
       ...(params.department_id ? { department_id: params.department_id } : {}),
       ...(params.ticket_id ? { ticket_id: params.ticket_id } : {}),
       ...(params.service_id ? { service_id: params.service_id } : {}),
@@ -368,7 +372,7 @@ export async function getTicketNotifications(
     '/orders/ticket-notifications',
     {
       params: {
-        ...(params.project_id ? { project_id: params.project_id } : {}),
+        ...projectScopeParam(params.project_id),
         page: String(params.page ?? 1),
         limit: String(params.limit ?? 10),
       },

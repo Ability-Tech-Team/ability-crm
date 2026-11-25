@@ -43,7 +43,7 @@ export default function UnitBlocksSearchPage() {
     hasSearched,
     categoryOptions,
     assigneeOptions,
-    projectOptions,
+    projectFilter,
     statusOptions,
     rentalCompanyMap,
     handleSubmit,
@@ -58,7 +58,7 @@ export default function UnitBlocksSearchPage() {
     tForm,
     tCommon,
     categoryOptions,
-    projectOptions,
+    projectFilter.fields,
     assigneeOptions,
     statusOptions,
   ).filter(
@@ -80,7 +80,10 @@ export default function UnitBlocksSearchPage() {
         title={`${t('title')} - ${tForm('search')}`}
         fields={visibleFields}
         buttons={getSearchButtons(tForm)}
-        initialValues={getSearchInitialValues(activeTab.defaultIsActive)}
+        initialValues={getSearchInitialValues(
+          activeTab.defaultIsActive,
+          projectFilter.initialValue,
+        )}
         validationSchema={searchSchema}
         onSubmit={handleSubmit}
         onReset={handleReset}

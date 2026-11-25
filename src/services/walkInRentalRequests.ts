@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 export interface WalkInRentalRequest {
   id: number;
@@ -135,9 +136,9 @@ function normalizeSearchParams(
   if (params.id_number?.trim()) {
     normalized.id_number = params.id_number.trim();
   }
-  if (Number.isFinite(params.project_id) && params.project_id! > 0) {
-    normalized.project_id = params.project_id;
-  }
+  // The given project, else the Super Admin's scope (src/lib/projectScope.ts).
+  const projectId = projectScopeParam(params.project_id).project_id;
+  if (projectId) normalized.project_id = projectId;
   if (Number.isFinite(params.rental_status) && params.rental_status! > 0) {
     normalized.rental_status = params.rental_status;
   }

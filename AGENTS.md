@@ -86,6 +86,16 @@ the workspace instead of assuming it exists.
     e.g. `/definitions/erp-codes`).
   - The API enforces sessions and privileges on every call; the menus and
     hidden buttons are presentation.
+- **The Super Admin's project (2026-11-25):** the Super Admin
+  (`src/lib/superAdmin.ts`) picks the project to work in from the header
+  (`src/store/useProjectScopeStore.ts`, `src/lib/projectScope.ts`, loaded by
+  `SessionGate` from `GET /projects/accessible`). Services send it with
+  `projectScopeParam()` on every route that takes a `project_id` (the units
+  routes require it from the Super Admin) and never where the route refuses one. List
+  screens add `useProjectFilter()` (`src/lib/projectFilter.ts`), shown to the
+  Super Admin only. Projects and Sub-projects definitions are for the Super
+  Admin only (`superAdminOnly` route rules; the sidebar adds them). Nothing changes for
+  other employees.
 - **CRM assistant chat (2026-11-24; `../AGENTS.md`, The CRM assistant):**
   `src/components/assistant/` (the floating button, mounted once in
   `AppShell`, and the panel, loaded on first open), `src/hooks/useAssistantChat.ts`,

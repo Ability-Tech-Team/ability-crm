@@ -19,6 +19,8 @@ import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import { getEmployees } from '@/src/services/employees';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import {
   closeOwnershipManagementRequest,
   getOwnershipManagementRequests,
@@ -37,6 +39,7 @@ const LIMIT = 10;
 const DESCRIPTION_MAX_LENGTH = 60;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   unit_id: z.string().optional(),
   unit_number: z.string().optional(),
   is_exact: z.string().optional(),
@@ -50,6 +53,7 @@ const searchSchema = z.object({
 type SearchFormData = z.infer<typeof searchSchema>;
 
 type SearchParams = {
+  project_id?: number;
   unit_id?: number;
   unit_number?: string;
   is_exact?: number;
@@ -76,6 +80,7 @@ function renderTruncatedText(value: string | null) {
 export default function OwnershipManagementSearch() {
   const t = useTranslations('ownershipManagement');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const { success: showSuccess, error: showError } = useResponseMessage();
 
@@ -174,6 +179,7 @@ export default function OwnershipManagementSearch() {
   const handleSubmit = async (data: SearchFormData) => {
     setHasSearched(true);
     const params: SearchParams = {
+      project_id: projectFilterParam(data.project_id),
       unit_id: data.unit_id ? Number(data.unit_id) : undefined,
       unit_number: data.unit_number || undefined,
       is_exact: data.is_exact === '1' ? 1 : undefined,
@@ -275,6 +281,7 @@ export default function OwnershipManagementSearch() {
 
   // ── Form config ──────────────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'unit_number',
       label: t('filters.unitNumber'),
@@ -474,6 +481,7 @@ export default function OwnershipManagementSearch() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           unit_id: '',
           unit_number: '',
           is_exact: '1',

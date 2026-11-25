@@ -1,3 +1,4 @@
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import type { SearchFormData, SearchParams } from './types';
 
 /**
@@ -14,7 +15,8 @@ export function buildSearchParams(
     unit_number: data.unit_number || undefined,
     is_exact: data.is_exact === '1' ? 1 : undefined,
     category_id: data.category_id ? Number(data.category_id) : undefined,
-    project_id: data.project_id ? Number(data.project_id) : undefined,
+    // The filter's project, else the Super Admin's (src/lib/projectFilter.ts).
+    project_id: projectFilterParam(data.project_id),
     customer_name: data.customer_name || undefined,
     customer_mobile: data.customer_mobile || undefined,
     assign_to_id: data.assign_to_id || undefined,
@@ -33,14 +35,20 @@ export function buildSearchParams(
   };
 }
 
-/** The blank filters a tab opens with; only the Status default differs. */
-export function getSearchInitialValues(defaultIsActive: string) {
+/**
+ * The blank filters a tab opens with; only the Status default differs. The
+ * Super Admin's Project filter starts at the header's project.
+ */
+export function getSearchInitialValues(
+  defaultIsActive: string,
+  projectId = '',
+) {
   return {
     unit_id: '',
     unit_number: '',
     is_exact: '1',
     category_id: '',
-    project_id: '',
+    project_id: projectId,
     customer_name: '',
     customer_mobile: '',
     assign_to_id: '',

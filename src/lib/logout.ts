@@ -1,6 +1,7 @@
 import api from './http';
 import { useSessionStore } from '../store/useSessionStore';
 import { browserSessionStorage, clearAssistantChats } from './assistantChat';
+import { clearProjectScopes } from './projectScope';
 
 export const LOGOUT_ENDPOINT = '/auth/logout';
 
@@ -17,10 +18,13 @@ export async function logoutAndClearSession(): Promise<void> {
     // Leaving the app is what the user asked for.
   } finally {
     // The next employee to sign in on this tab must not see this one's
-    // assistant chat.
+    // assistant chat or start in their project.
     try {
       const storage = browserSessionStorage();
-      if (storage) clearAssistantChats(storage);
+      if (storage) {
+        clearAssistantChats(storage);
+        clearProjectScopes(storage);
+      }
     } catch {
       // Blocked storage holds no chat.
     }

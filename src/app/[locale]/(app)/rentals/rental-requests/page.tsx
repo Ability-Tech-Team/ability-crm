@@ -19,11 +19,14 @@ import {
   type WalkInRentalRequest,
 } from '@/src/services/walkInRentalRequests';
 import { getDelegates, type Delegate } from '@/src/services/rentals';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import { getSourceLabelKey, WALK_IN_SOURCE } from './utils';
 
 const LIMIT = 10;
 
 const searchWalkInRequestsSchema = z.object({
+  project_id: z.string().optional(),
   id: z.string().optional(),
   customer_name: z.string().optional(),
   id_number: z.string().optional(),
@@ -77,6 +80,7 @@ export default function RentalRequestsPage() {
     return key ? t(`rentalRequests.source.${key}`) : '—';
   };
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const searchParamsFromUrl = useSearchParams();
   const privileges = useRoutePrivileges('/rentals/rental-requests');
@@ -137,6 +141,7 @@ export default function RentalRequestsPage() {
       try {
         const response = await searchWalkInRentalRequests({
           ...params,
+          project_id: projectFilterParam(params.project_id),
           id: params.id ? Number(params.id) : undefined,
           rental_status: params.rental_status
             ? Number(params.rental_status)
@@ -213,6 +218,7 @@ export default function RentalRequestsPage() {
   const requestsExportParams = useMemo(
     () => ({
       ...searchParams,
+      project_id: projectFilterParam(searchParams.project_id),
       id: searchParams.id ? Number(searchParams.id) : undefined,
       rental_status: searchParams.rental_status
         ? Number(searchParams.rental_status)
@@ -254,6 +260,7 @@ export default function RentalRequestsPage() {
   );
 
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'id',
       label: t('rentalRequests.columns.referenceNumber'),
@@ -405,6 +412,7 @@ export default function RentalRequestsPage() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           customer_name: searchParams.customer_name ?? '',
           id_number: searchParams.id_number ?? '',
           unit_number: searchParams.unit_number ?? '',

@@ -38,6 +38,11 @@ export type PrivilegeRequirement = number | string;
 export type AppRouteAccessRule = {
   pattern: string;
   allowedHrefs: string[];
+  /**
+   * Opens for the Super Admin only, whatever the permission tree holds: the
+   * screens of `SUPER_ADMIN_HREFS`, which have no menu item of their own.
+   */
+  superAdminOnly?: boolean;
   requiredPrivileges?: PrivilegeRequirement[];
 };
 
@@ -98,6 +103,16 @@ const PRIVILEGE_NAME_FALLBACKS: Partial<Record<number, string[]>> = {
   [PRIVILEGE_IDS.LEGAL_BLOCK]: ['legal block', 'legal'],
   [PRIVILEGE_IDS.UNBLOCK]: ['unblock'],
 };
+
+/**
+ * Screens for the Super Admin only (the user's decision, 2026-11-25): the
+ * projects and sub-projects definitions. The API's `/projects` and
+ * `/sub-projects` routes are Super Admin only too (`@Roles`).
+ */
+export const SUPER_ADMIN_HREFS = {
+  projects: '/definitions/projects',
+  subProjects: '/definitions/sub-projects',
+} as const;
 
 export const UNIT_DEBTS_IMPORT_HREF = '/imports/unit-debts';
 
@@ -177,6 +192,16 @@ export const APP_ROUTE_ACCESS_RULES: AppRouteAccessRule[] = [
   {
     pattern: '/definitions/erp-codes',
     allowedHrefs: ['/definitions/erp-codes'],
+  },
+  {
+    pattern: SUPER_ADMIN_HREFS.projects,
+    allowedHrefs: [],
+    superAdminOnly: true,
+  },
+  {
+    pattern: SUPER_ADMIN_HREFS.subProjects,
+    allowedHrefs: [],
+    superAdminOnly: true,
   },
   { pattern: '/document-library', allowedHrefs: ['/document-library'] },
   { pattern: '/logs/search', allowedHrefs: ['/logs/search'] },
@@ -599,11 +624,16 @@ export function canAccessAppPath(
     CurrentUserPrivilegeIndexes,
     'activeRouteHrefs' | 'menuItemsByHref'
   >,
+  options: { isSuperAdmin?: boolean } = {},
 ): boolean {
   const rule = findRouteAccessRule(pathname);
 
   if (!rule) {
     return false;
+  }
+
+  if (rule.superAdminOnly) {
+    return options.isSuperAdmin === true;
   }
 
   const accessibleMenuHrefs = rule.allowedHrefs.filter((href) =>

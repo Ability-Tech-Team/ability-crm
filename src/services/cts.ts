@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -71,6 +72,8 @@ export interface GetCtsResponse {
 }
 
 export interface GetCtsParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   cts_id?: number;
   unit_number?: string;
   unit_id?: number;
@@ -86,6 +89,7 @@ export async function getCtsRecords(
 ): Promise<GetCtsResponse> {
   const response = await api.get<GetCtsRaw>('/orders/cts', {
     params: {
+      ...projectScopeParam(params.project_id),
       ...(params.cts_id ? { cts_id: params.cts_id } : {}),
       ...(params.unit_number ? { unit_number: params.unit_number } : {}),
       ...(params.unit_id ? { unit_id: params.unit_id } : {}),

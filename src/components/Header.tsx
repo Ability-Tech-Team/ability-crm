@@ -23,6 +23,10 @@ import ContactSupportModal from './ContactSupportModal';
 import { useState, useRef, useEffect } from 'react';
 import { logoutAndClearSession } from '@/src/lib/logout';
 import { buildPortalHomeUrl } from '@/src/lib/portal';
+import { browserSessionStorage } from '@/src/lib/assistantChat';
+import { storeProjectScope } from '@/src/lib/projectScope';
+import { isSuperAdminRole } from '@/src/lib/superAdmin';
+import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
 
 interface Notification {
   id: string;
@@ -33,7 +37,12 @@ interface Notification {
 export default function Header() {
   const { isCollapsed, toggle } = useSidebarStore();
   const { details, portalBaseUrl } = useSession();
-  const { userName, roleName, projectName } = details;
+  const { userName, roleName, projectName, employeeId } = details;
+  // The Super Admin picks the project to work in (src/lib/projectScope.ts).
+  const isSuperAdmin = isSuperAdminRole(roleName);
+  const scopeProjects = useProjectScopeStore((s) => s.projects);
+  const scopeProjectId = useProjectScopeStore((s) => s.projectId);
+  const setScopeProjectId = useProjectScopeStore((s) => s.setProjectId);
   const t = useTranslations('common');
   const tAuth = useTranslations('auth');
   const tSession = useTranslations('session');
@@ -106,7 +115,29 @@ export default function Header() {
       </div>
 
       <div className="flex justify-center min-w-0 px-2">
-        {projectName ? (
+        {isSuperAdmin && scopeProjects.length ? (
+          <label className="max-w-full rounded-full border border-sky-100 bg-linear-to-r from-sky-50 via-white to-cyan-50 px-3 py-1 text-center shadow-sm focus-within:ring-2 focus-within:ring-sky-300 sm:px-5 sm:py-1.5">
+            <span className="block truncate text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-700 sm:text-xs">
+              {t('project')}
+            </span>
+            <select
+              value={scopeProjectId === null ? '' : String(scopeProjectId)}
+              onChange={(event) => {
+                const projectId = Number(event.target.value);
+                if (!Number.isInteger(projectId) || projectId <= 0) return;
+                setScopeProjectId(projectId);
+                storeProjectScope(browserSessionStorage(), employeeId, projectId);
+              }}
+              className="block max-w-full cursor-pointer truncate bg-transparent text-center text-sm font-bold text-slate-700 focus:outline-none sm:text-base"
+            >
+              {scopeProjects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : projectName ? (
           <div className="max-w-full rounded-full border border-sky-100 bg-linear-to-r from-sky-50 via-white to-cyan-50 px-3 py-1 text-center shadow-sm sm:px-5 sm:py-1.5">
             <p className="truncate text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-700 sm:text-xs">
               {t('project')}

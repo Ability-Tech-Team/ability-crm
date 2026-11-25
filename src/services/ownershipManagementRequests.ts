@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -50,6 +51,8 @@ export interface GetOwnershipManagementRequestsResponse {
 }
 
 export interface GetOwnershipManagementRequestsParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   id?: number;
   unit_id?: number;
   unit_number?: string;
@@ -85,6 +88,7 @@ export async function getOwnershipManagementRequests(
     '/customers/ownership-management-requests',
     {
       params: {
+        ...projectScopeParam(params.project_id),
         ...(params.id ? { id: params.id } : {}),
         ...(params.unit_id ? { unit_id: params.unit_id } : {}),
         ...(params.unit_number ? { unit_number: params.unit_number } : {}),

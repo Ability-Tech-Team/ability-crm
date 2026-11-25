@@ -12,11 +12,14 @@ import { getCustomers, type Customer } from '@/src/services/customers';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import MainBox from '@/src/components/ui/MainBox';
 import { useSelectedCustomerStore } from '@/src/store/useSelectedCustomerStore';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 
 const LIMIT = 10;
 
 // Define your validation schema
 const customerSearchSchema = z.object({
+  project_id: z.string().optional(),
   name: z.string().optional(),
   phone: z.string().optional(),
   code: z.string().optional(),
@@ -30,6 +33,7 @@ type SearchFormData = z.infer<typeof customerSearchSchema>;
 export default function CustomersSearch() {
   const t = useTranslations('customers');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const router = useRouter();
   const { data: dropdowns } = useDropdowns();
   const setSelectedCustomer = useSelectedCustomerStore((s) => s.setCustomer);
@@ -64,6 +68,7 @@ export default function CustomersSearch() {
   const fetchCustomers = useCallback(
     async (
       params: {
+        project_id?: number;
         customer_name?: string;
         customer_code?: string;
         id_number?: string;
@@ -105,6 +110,7 @@ export default function CustomersSearch() {
   const handleSubmit = async (data: SearchFormData) => {
     setHasSearched(true);
     const params = {
+      project_id: projectFilterParam(data.project_id),
       customer_name: data.name || undefined,
       customer_code: data.code || undefined,
       id_number: data.idNumber || undefined,
@@ -151,6 +157,7 @@ export default function CustomersSearch() {
   );
 
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'name',
       label: tForm('name'),
@@ -274,6 +281,7 @@ export default function CustomersSearch() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           name: '',
           phone: '',
           code: '',

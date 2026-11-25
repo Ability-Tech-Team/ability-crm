@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -99,7 +100,7 @@ export async function getOwnerRelativeRequests(
       params: {
         ...(params.id ? { id: params.id } : {}),
         ...(params.owner_id ? { owner_id: params.owner_id } : {}),
-        ...(params.project_id ? { project_id: params.project_id } : {}),
+        ...projectScopeParam(params.project_id),
         ...(params.unit_number ? { unit_number: params.unit_number } : {}),
         ...(params.mobile_number
           ? { mobile_number: params.mobile_number }

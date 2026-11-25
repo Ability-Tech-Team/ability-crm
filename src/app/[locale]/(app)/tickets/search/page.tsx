@@ -26,10 +26,13 @@ import { getServices } from '@/src/services/services';
 import { getEmployees } from '@/src/services/employees';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
 import TicketPrintReceipt from '@/src/components/TicketPrintReceipt';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 
 const LIMIT = 10;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   department_id: z.string().optional(),
   ticket_id: z.string().optional(),
   service_id: z.string().optional(),
@@ -49,6 +52,7 @@ type SearchFormData = z.infer<typeof searchSchema>;
 export default function TicketsSearch() {
   const t = useTranslations('tickets');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const { success: showSuccess, error: showError } = useResponseMessage();
   const { hasAnyPrivilegeForHrefs, hasPrivilegeForHref } =
@@ -207,6 +211,7 @@ export default function TicketsSearch() {
       try {
         const data = await getTickets(
           {
+            project_id: projectFilterParam(params.project_id),
             department_id: params.department_id
               ? Number(params.department_id)
               : undefined,
@@ -282,6 +287,7 @@ export default function TicketsSearch() {
     () =>
       searchParams
         ? {
+            project_id: projectFilterParam(searchParams.project_id),
             department_id: searchParams.department_id
               ? Number(searchParams.department_id)
               : undefined,
@@ -356,6 +362,7 @@ export default function TicketsSearch() {
 
   // ── Form fields & buttons ────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'ticket_id',
       label: tForm('ticketId'),
@@ -706,6 +713,7 @@ export default function TicketsSearch() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           ticket_id: '',
           department_id: '',
           service_id: '',

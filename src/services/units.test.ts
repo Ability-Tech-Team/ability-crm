@@ -2,9 +2,11 @@ import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios';
 import { afterEach, describe, expect, it } from 'vitest';
 import { setApiAddresses } from '@/src/lib/apiConfig';
 import api from '@/src/lib/http';
+import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
 import {
   getPrimaryCustomer,
   getUnitDebitAmount,
+  getUnits,
   setUnitDebt,
   type CustomerUnit,
 } from './units';
@@ -21,6 +23,7 @@ function answer(
 
 afterEach(() => {
   api.defaults.adapter = undefined;
+  useProjectScopeStore.setState({ projectId: null, projects: [] });
 });
 
 describe('getUnitDebitAmount', () => {
@@ -77,5 +80,32 @@ describe('setUnitDebt', () => {
     expect(seen?.method).toBe('post');
     expect(seen?.url).toBe('/projects/units/debt/9');
     expect(JSON.parse(String(seen?.data))).toEqual({ debit_amount: -250.75 });
+  });
+});
+
+describe('the project of a units call', () => {
+  const listAnswer = { result: { units: [], totalCount: 0 }, success: true, statusCode: 200 };
+
+  it('names the Super Admin\'s project, which the units routes require from them', async () => {
+    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999', socketOrigin: 'http://172.20.1.141:9999' });
+    useProjectScopeStore.setState({ projectId: 5, projects: [{ id: 5, name: 'North', active: true }] });
+    let seen: InternalAxiosRequestConfig | undefined;
+    api.defaults.adapter = answer(listAnswer, (config) => {
+      seen = config;
+    });
+    await getUnits({ unit_number: 'A-1' });
+    expect(seen?.params).toMatchObject({ unit_number: 'A-1', project_id: 5 });
+    await getUnits({ unit_number: 'A-1', project_id: 2 });
+    expect(seen?.params).toMatchObject({ project_id: 2 });
+  });
+
+  it('sends no project for anyone else', async () => {
+    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999', socketOrigin: 'http://172.20.1.141:9999' });
+    let seen: InternalAxiosRequestConfig | undefined;
+    api.defaults.adapter = answer(listAnswer, (config) => {
+      seen = config;
+    });
+    await getUnits({ unit_number: 'A-1' });
+    expect(seen?.params).not.toHaveProperty('project_id');
   });
 });

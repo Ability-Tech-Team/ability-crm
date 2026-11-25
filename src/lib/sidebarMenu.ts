@@ -20,6 +20,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   hasActivePrivileges,
   normalizeAppPathname,
+  SUPER_ADMIN_HREFS,
   UNIT_DEBTS_IMPORT_ACCESS_HREFS,
   UNIT_DEBTS_IMPORT_HREF,
 } from '@/src/lib/currentUserPrivileges';
@@ -110,17 +111,33 @@ const isShownOnMenu = (
   hasActivePrivileges(item);
 
 /** Labels for the screens the menu adds itself, in the current language. */
-export type SidebarLabels = { importUnitDebts: string };
+export type SidebarLabels = {
+  importUnitDebts: string;
+  projects: string;
+  subProjects: string;
+};
+
+/** Who is signed in, for the screens only some roles see. */
+export type SidebarOptions = { isSuperAdmin?: boolean };
 
 /** A screen as the menu lists it. */
 type ShownItem = { key: string; name: string; href: string };
 
 /**
- * The menu's screens to show. Import Unit Debts needs no grant of its own
- * (`UNIT_DEBTS_IMPORT_ACCESS_HREFS`), so the menu holding another import
- * sheet screen gets it, before Import History, when the role lacks the item.
+ * The menu's screens to show.
+ *
+ * - Import Unit Debts needs no grant of its own
+ *   (`UNIT_DEBTS_IMPORT_ACCESS_HREFS`), so the menu holding another import
+ *   sheet screen gets it, before Import History, when the role lacks the item.
+ * - For the Super Admin, the menu holding the definitions gets Projects and
+ *   Sub-projects (`SUPER_ADMIN_HREFS`), which the permission tree has no
+ *   items for.
  */
-const shownItems = (menu: RoleMenu, labels: SidebarLabels): ShownItem[] => {
+const shownItems = (
+  menu: RoleMenu,
+  labels: SidebarLabels,
+  options: SidebarOptions,
+): ShownItem[] => {
   const items: ShownItem[] = (menu.menuitems ?? [])
     .filter(isShownOnMenu)
     .map((item) => ({ key: String(item.id), name: item.name, href: item.href }));
@@ -139,6 +156,21 @@ const shownItems = (menu: RoleMenu, labels: SidebarLabels): ShownItem[] => {
       (item) => normalizeAppPathname(item.href) === '/imports/history',
     );
     items.splice(historyAt === -1 ? items.length : historyAt, 0, unitDebts);
+  }
+
+  const holdsDefinitions = [...hrefs].some((href) =>
+    href.startsWith('/definitions/'),
+  );
+  if (options.isSuperAdmin && holdsDefinitions) {
+    const superAdminItems: ShownItem[] = [
+      { key: 'projects', name: labels.projects, href: SUPER_ADMIN_HREFS.projects },
+      {
+        key: 'sub-projects',
+        name: labels.subProjects,
+        href: SUPER_ADMIN_HREFS.subProjects,
+      },
+    ];
+    items.push(...superAdminItems.filter((item) => !hrefs.has(item.href)));
   }
 
   return items;
@@ -196,13 +228,14 @@ const buildSubItems = (
 export const buildSidebarMenu = (
   menus: RoleMenu[],
   labels: SidebarLabels,
+  options: SidebarOptions = {},
 ): SidebarItem[] => {
   const items: SidebarItem[] = [];
 
   for (const menu of applyMenuPlacements(menus)) {
     const icon =
       MENU_ICON_MAP[menu.id] ?? iconForMenuHrefs(menu) ?? FALLBACK_ICON;
-    const menuItems = shownItems(menu, labels);
+    const menuItems = shownItems(menu, labels, options);
 
     // Single menu item → render as a direct link
     if (menuItems.length === 1) {

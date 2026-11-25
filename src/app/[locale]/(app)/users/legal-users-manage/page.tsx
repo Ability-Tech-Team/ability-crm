@@ -14,6 +14,8 @@ import { useDropdowns } from '@/src/hooks/useDropdowns';
 import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import {
   deleteLegalEmployee,
   getLegalEmployees,
@@ -27,6 +29,7 @@ const LIMIT = 10;
 const ALL_PROJECTS_ID = 1;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   full_name: z.string().optional(),
   mobile_number: z.string().optional(),
   is_active: z.string().optional(),
@@ -35,6 +38,7 @@ const searchSchema = z.object({
 type SearchFormData = z.infer<typeof searchSchema>;
 
 type SearchParams = {
+  project_id?: number;
   full_name?: string;
   mobile_number?: string;
   is_active?: number;
@@ -43,6 +47,7 @@ type SearchParams = {
 export default function ManageLegalUsers() {
   const t = useTranslations('legalEmployees');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const router = useRouter();
   const { data: dropdowns } = useDropdowns();
   const { success: showSuccess, error: showError } = useResponseMessage();
@@ -103,6 +108,7 @@ export default function ManageLegalUsers() {
   const handleSubmit = async (data: SearchFormData) => {
     setHasSearched(true);
     const params: SearchParams = {
+      project_id: projectFilterParam(data.project_id),
       full_name: data.full_name || undefined,
       mobile_number: data.mobile_number || undefined,
       is_active:
@@ -202,6 +208,7 @@ export default function ManageLegalUsers() {
 
   // ── Form config ──────────────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'full_name',
       label: t('filters.fullName'),
@@ -344,7 +351,12 @@ export default function ManageLegalUsers() {
         title={`${t('title')} - ${tForm('search')}`}
         fields={fields}
         buttons={buttons}
-        initialValues={{ full_name: '', mobile_number: '', is_active: '' }}
+        initialValues={{
+          project_id: projectFilter.initialValue,
+          full_name: '',
+          mobile_number: '',
+          is_active: '',
+        }}
         validationSchema={searchSchema}
         onSubmit={handleSubmit}
         onReset={handleReset}

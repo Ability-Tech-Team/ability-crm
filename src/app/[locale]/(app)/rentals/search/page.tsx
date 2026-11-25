@@ -10,6 +10,8 @@ import DataTable, { ColumnDef } from '@/src/components/ui/DataTable';
 import MainBox from '@/src/components/ui/MainBox';
 import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import {
   RENTAL_STATUSES,
@@ -128,6 +130,8 @@ function formatDateValue(value?: string) {
 export default function SearchRentalsPage() {
   const t = useTranslations('rentals');
   const tForm = useTranslations('form');
+  // The Super Admin's Project filter (src/lib/projectFilter.ts); hidden for everyone else.
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const searchParamsFromUrl = useSearchParams();
   const privileges = useRoutePrivileges('/rentals/search');
@@ -187,7 +191,7 @@ export default function SearchRentalsPage() {
       try {
         const response = await getRentals({
           ...params,
-          project_id: params.project_id ? Number(params.project_id) : undefined,
+          project_id: projectFilterParam(params.project_id),
           page,
           limit,
         });
@@ -252,20 +256,9 @@ export default function SearchRentalsPage() {
   const rentalsExportParams = useMemo(
     () => ({
       ...searchParams,
-      project_id: searchParams.project_id
-        ? Number(searchParams.project_id)
-        : undefined,
+      project_id: projectFilterParam(searchParams.project_id),
     }),
     [searchParams],
-  );
-
-  const projectOptions = useMemo(
-    () =>
-      (dropdowns?.company_projects ?? []).map((project) => ({
-        value: String(project.id),
-        label: project.name,
-      })),
-    [dropdowns],
   );
 
   const statusOptions = useMemo(() => {
@@ -332,13 +325,7 @@ export default function SearchRentalsPage() {
       placeholder: tForm('idNumber'),
       type: 'text',
     },
-    {
-      name: 'project_id',
-      label: tForm('project'),
-      placeholder: tForm('project'),
-      fieldType: 'select',
-      options: projectOptions,
-    },
+    ...projectFilter.fields,
     {
       name: 'rental_status',
       label: t('filters.status'),
@@ -479,7 +466,7 @@ export default function SearchRentalsPage() {
           end_date: searchParams.end_date ?? '',
           rental_status: searchParams.rental_status ?? '',
           unit_number: searchParams.unit_number ?? '',
-          project_id: searchParams.project_id ?? '',
+          project_id: searchParams.project_id ?? projectFilter.initialValue,
         }}
         validationSchema={searchRentalsSchema}
         onSubmit={handleSubmit}

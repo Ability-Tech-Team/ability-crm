@@ -21,10 +21,10 @@ export const TABS: SearchTab[] = [
     // The overview mixes both kinds of block, so it takes both privileges.
     privileges: [PRIVILEGE_IDS.FINANCE_BLOCK, PRIVILEGE_IDS.LEGAL_BLOCK],
     hiddenColumnIds: [],
-    // `/projects/units` only accepts these three of our filters.
+    // `/projects/units` only accepts these of our filters (and the Super
+    // Admin's project, which it requires).
     hiddenFieldNames: [
       'category_id',
-      'project_id',
       'customer_name',
       'customer_mobile',
       'assign_to_id',
@@ -91,7 +91,8 @@ export function getSearchFields(
   tForm: Translate,
   tCommon: Translate,
   categoryOptions: SelectOption[],
-  projectOptions: SelectOption[],
+  /** The Super Admin's Project filter (`useProjectFilter`); empty for everyone else. */
+  projectFields: FieldConfig[],
   assigneeOptions: SelectOption[],
   statusOptions: SelectOption[],
 ): FieldConfig[] {
@@ -116,13 +117,7 @@ export function getSearchFields(
       fieldType: 'select',
       options: categoryOptions,
     },
-    {
-      name: 'project_id',
-      label: t('filters.project'),
-      placeholder: t('filters.selectProject'),
-      fieldType: 'select',
-      options: projectOptions,
-    },
+    ...projectFields,
     {
       name: 'customer_name',
       label: t('filters.customerName'),

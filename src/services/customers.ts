@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -109,6 +110,8 @@ export interface GetCustomersResponse {
 }
 
 export interface GetCustomersParams {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   id?: number;
   customer_name?: string;
   customer_code?: string;
@@ -128,6 +131,7 @@ export async function getCustomers(
 ): Promise<GetCustomersResponse> {
   const response = await api.get<GetCustomersRaw>('/customers', {
     params: {
+      ...projectScopeParam(params.project_id),
       ...(params.id ? { id: params.id } : {}),
       ...(params.customer_name ? { customer_name: params.customer_name } : {}),
       ...(params.customer_code ? { customer_code: params.customer_code } : {}),
@@ -186,6 +190,8 @@ export async function findCustomerByIdNumber(
 
 /** `POST /customers` (`ability-crm-api/libs/domain/src/customers`). */
 export interface CreateCustomerDto {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   customer_name: string;
   country_id: number;
   id_type: number;
@@ -208,7 +214,7 @@ export async function createCustomer(
 ): Promise<{ id: number; customer_name: string }> {
   const response = await api.post<{
     result?: { id?: unknown; customer_name?: unknown } | null;
-  }>('/customers', body);
+  }>('/customers', { ...body, ...projectScopeParam(body.project_id) });
   const result = response.data?.result;
   if (typeof result?.id !== 'number') {
     throw new Error('The API answered without the customer’s id.');
@@ -224,6 +230,8 @@ export async function createCustomer(
 
 /** `POST /customers/assign-unit-to-customer`. */
 export interface AssignUnitToCustomerDto {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   customer_id: number;
   unit_id: number;
   /** Required by the API even with `unit_id`. */
@@ -247,7 +255,7 @@ export async function assignUnitToCustomer(
 ): Promise<{ ownershipId: number | null }> {
   const response = await api.post<{ result?: { id?: unknown } | null }>(
     '/customers/assign-unit-to-customer',
-    body,
+    { ...body, ...projectScopeParam(body.project_id) },
   );
   const id = response.data?.result?.id;
   return { ownershipId: typeof id === 'number' ? id : null };
@@ -255,6 +263,8 @@ export async function assignUnitToCustomer(
 
 /** `POST /customers/relatives`. */
 export interface AddRelativeDto {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   owner_id: number;
   unit_id: number;
   relative_name: string;
@@ -281,13 +291,15 @@ export async function addRelative(
 ): Promise<{ relativeId: number | null }> {
   const response = await api.post<{ result?: { relative_id?: unknown } | null }>(
     '/customers/relatives',
-    body,
+    { ...body, ...projectScopeParam(body.project_id) },
   );
   const id = response.data?.result?.relative_id;
   return { relativeId: typeof id === 'number' ? id : null };
 }
 
 export interface UpdateCustomerDto {
+  /** The Super Admin's project; defaults to the scope (src/lib/projectScope.ts). */
+  project_id?: number;
   customer_code?: string;
   id_type?: number | null;
   id_number?: string | null;
@@ -300,7 +312,10 @@ export async function updateCustomer(
   customerId: number,
   body: UpdateCustomerDto,
 ): Promise<void> {
-  await api.post(`/customers/update/${customerId}`, body);
+  await api.post(`/customers/update/${customerId}`, {
+    ...body,
+    ...projectScopeParam(body.project_id),
+  });
 }
 
 /**
@@ -312,7 +327,10 @@ export async function deleteCustomer(
   customerId: number,
   body: { project_id?: number } = {},
 ): Promise<void> {
-  await api.post(`/customers/delete/${customerId}`, body);
+  await api.post(`/customers/delete/${customerId}`, {
+    ...body,
+    ...projectScopeParam(body.project_id),
+  });
 }
 
 // ─── Ownership (replaces what SAP did on contracts) ─────────
@@ -332,7 +350,10 @@ export interface EndOwnershipDto {
  * call followed by assigning the new owner.
  */
 export async function endOwnership(payload: EndOwnershipDto): Promise<void> {
-  await api.post('/customers/end-ownership', payload);
+  await api.post('/customers/end-ownership', {
+    ...payload,
+    ...projectScopeParam(payload.project_id),
+  });
 }
 
 export interface UpdateOwnershipDto {
@@ -355,5 +376,8 @@ export async function updateOwnership(
   ownershipId: number,
   payload: UpdateOwnershipDto,
 ): Promise<void> {
-  await api.post(`/customers/ownership/update/${ownershipId}`, payload);
+  await api.post(`/customers/ownership/update/${ownershipId}`, {
+    ...payload,
+    ...projectScopeParam(payload.project_id),
+  });
 }

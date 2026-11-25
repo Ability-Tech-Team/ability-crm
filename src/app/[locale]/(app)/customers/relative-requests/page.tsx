@@ -21,6 +21,8 @@ import SecureImage from '@/src/components/ui/SecureImage';
 import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import {
   acceptOwnerRelativeRequest,
@@ -99,6 +101,8 @@ export default function CustomerRelativeRequestsPage() {
   const tCustomers = useTranslations('customers');
   const t = useTranslations('customers.relativeRequests');
   const tForm = useTranslations('form');
+  // The Super Admin's Project filter (src/lib/projectFilter.ts); hidden for everyone else.
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const { error: showError } = useResponseMessage();
 
@@ -165,7 +169,7 @@ export default function CustomerRelativeRequestsPage() {
     const params: SearchParams = {
       id: data.id ? Number(data.id) : undefined,
       owner_id: data.owner_id ? Number(data.owner_id) : undefined,
-      project_id: data.project_id ? Number(data.project_id) : undefined,
+      project_id: projectFilterParam(data.project_id),
       unit_number: data.unit_number || undefined,
       mobile_number: data.mobile_number || undefined,
       relative_identification_id: data.relative_identification_id || undefined,
@@ -241,15 +245,6 @@ export default function CustomerRelativeRequestsPage() {
     }
   };
 
-  const projectOptions = useMemo(
-    () =>
-      (dropdowns?.company_projects ?? []).map((option) => ({
-        value: String(option.id),
-        label: option.name,
-      })),
-    [dropdowns],
-  );
-
   const statusOptions = useMemo(
     () =>
       (dropdowns?.owner_relative_request_statuses ?? []).map((option) => ({
@@ -293,13 +288,7 @@ export default function CustomerRelativeRequestsPage() {
       placeholder: t('filters.relativeIdNumber'),
       type: 'text',
     },
-    {
-      name: 'project_id',
-      label: t('filters.projectId'),
-      placeholder: t('filters.selectProject'),
-      fieldType: 'select',
-      options: projectOptions,
-    },
+    ...projectFilter.fields,
     {
       name: 'request_status_id',
       label: t('filters.status'),
@@ -500,7 +489,7 @@ export default function CustomerRelativeRequestsPage() {
         initialValues={{
           id: '',
           owner_id: '',
-          project_id: '',
+          project_id: projectFilter.initialValue,
           unit_number: '',
           mobile_number: '',
           relative_identification_id: '',

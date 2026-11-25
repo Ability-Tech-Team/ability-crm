@@ -20,10 +20,13 @@ import {
 } from '@/src/services/invoices';
 import { getServices } from '@/src/services/services';
 import type { DropdownOption } from '@/src/types/dropdowns';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 
 const LIMIT = 10;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   ticket_id: z.string().optional(),
   invoice_number: z.string().optional(),
   invoice_status_id: z.string().optional(),
@@ -160,6 +163,7 @@ function getStatusBg(
 export default function InvoicesSearch() {
   const t = useTranslations('invoices');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const invoiceSearchPrivileges = useRoutePrivileges('/invoices/search');
   const canReadInvoice = invoiceSearchPrivileges.hasAnyPrivilege([
@@ -306,6 +310,7 @@ export default function InvoicesSearch() {
       try {
         const data = await getInvoices(
           {
+            project_id: projectFilterParam(params.project_id),
             ticket_id: params.ticket_id ? Number(params.ticket_id) : undefined,
             invoice_number: params.invoice_number || undefined,
             invoice_status_id: params.invoice_status_id
@@ -387,6 +392,7 @@ export default function InvoicesSearch() {
     () =>
       searchParams
         ? {
+            project_id: projectFilterParam(searchParams.project_id),
             ticket_id: searchParams.ticket_id
               ? Number(searchParams.ticket_id)
               : undefined,
@@ -430,6 +436,7 @@ export default function InvoicesSearch() {
 
   // ── Form fields & buttons ────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'ticket_id',
       label: tForm('ticketId'),
@@ -796,6 +803,7 @@ export default function InvoicesSearch() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           ticket_id: '',
           invoice_number: '',
           invoice_status_id: '',

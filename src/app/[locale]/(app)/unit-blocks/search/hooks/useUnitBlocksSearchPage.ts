@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import { getUnits, type Unit } from '@/src/services/units';
 import { getUnitBlocks, type UnitBlock } from '@/src/services/unitBlocks';
@@ -18,6 +19,7 @@ import { buildSearchParams } from '../utils';
 export function useUnitBlocksSearchPage() {
   const t = useTranslations('unitBlocks');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
 
   const privileges = useRoutePrivileges('/unit-blocks/search');
@@ -104,6 +106,7 @@ export function useUnitBlocksSearchPage() {
             unit_id: params.unit_id,
             unit_number: params.unit_number,
             is_exact: params.is_exact === 1,
+            project_id: params.project_id,
             // Only units that currently hold a block; the kind narrows it.
             blocked_units: 1,
             is_legal: params.block_kind,
@@ -210,15 +213,6 @@ export function useUnitBlocksSearchPage() {
     [legalEmployees],
   );
 
-  const projectOptions = useMemo(
-    () =>
-      (dropdowns?.company_projects ?? []).map((option) => ({
-        value: String(option.id),
-        label: option.name,
-      })),
-    [dropdowns],
-  );
-
   const statusOptions = useMemo(
     () => [
       { value: '1', label: tForm('isActive') },
@@ -245,6 +239,7 @@ export function useUnitBlocksSearchPage() {
       ? { unit_number: searchParams.unit_number }
       : {}),
     ...(searchParams?.is_exact ? { is_exact: searchParams.is_exact } : {}),
+    ...(searchParams?.project_id ? { project_id: searchParams.project_id } : {}),
     blocked_units: 1,
     ...(searchParams?.block_kind !== undefined
       ? { is_legal: searchParams.block_kind }
@@ -275,7 +270,7 @@ export function useUnitBlocksSearchPage() {
     hasSearched,
     categoryOptions,
     assigneeOptions,
-    projectOptions,
+    projectFilter,
     statusOptions,
     rentalCompanyMap,
     handleSubmit,

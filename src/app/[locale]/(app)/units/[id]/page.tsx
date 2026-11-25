@@ -425,6 +425,7 @@ export default function UnitDetailPage() {
         const data = await getInvoices(
           {
             unit_id: unit.unit_id ?? unit.id,
+            project_id: unit.project_id,
             unit_number: unit.unit_number,
             page,
             limit,
@@ -460,6 +461,7 @@ export default function UnitDetailPage() {
         const data = await getInvoices(
           {
             unit_id: unit.unit_id ?? unit.id,
+            project_id: unit.project_id,
             unit_number: unit.unit_number,
             page,
             limit,
@@ -496,6 +498,7 @@ export default function UnitDetailPage() {
         const data = await getTickets(
           {
             unit_id: unit.unit_id ?? unit.id,
+            project_id: unit.project_id,
             unit_number: unit.unit_number,
             page,
             limit,
@@ -540,6 +543,8 @@ export default function UnitDetailPage() {
           unit.id,
           {
             unit_id: unit.unit_id ?? unit.id,
+            // The unit's own project, which the Super Admin must name.
+            project_id: unit.project_id,
             page,
             limit,
             ...(effectiveOwnershipId !== null
@@ -687,6 +692,7 @@ export default function UnitDetailPage() {
       const data = await getUnits(
         {
           unit_id: unit.unit_id ?? unit.id,
+          project_id: unit.project_id,
           unit_number: unit.unit_number,
           ownership_id: newFilter,
           limit: 100,
@@ -731,6 +737,7 @@ export default function UnitDetailPage() {
         const data = await getUnitMedia(
           {
             unit_id: unit.unit_id ?? unit.id,
+            project_id: unit.project_id,
             unit_number: unit.unit_number,
             page,
             limit,
@@ -855,6 +862,7 @@ export default function UnitDetailPage() {
       const newLocked = isUnblocking ? 0 : 1;
       const payload: Parameters<typeof updateUnit>[1] = {
         unit_id: unit.unit_id ?? unit.id,
+        project_id: unit.project_id,
         is_locked: newLocked,
       };
 
@@ -880,6 +888,7 @@ export default function UnitDetailPage() {
       const newValue = unit.is_eligible_for_rent === 1 ? 0 : 1;
       await updateUnit(unit.id, {
         unit_id: unit.unit_id ?? unit.id,
+        project_id: unit.project_id,
         is_eligible_for_rent: newValue,
       });
       setUnit({ ...unit, is_eligible_for_rent: newValue });
@@ -924,6 +933,7 @@ export default function UnitDetailPage() {
     try {
       await updateUnit(unit.id, {
         unit_id: unit.unit_id ?? unit.id,
+        project_id: unit.project_id,
         unit_specifications: { location_id: locationId },
       });
       // Find selected location to update local display
@@ -2185,6 +2195,7 @@ export default function UnitDetailPage() {
           }}
           context={{
             unit_id: unit.unit_id ?? unit.id,
+            project_id: unit.project_id,
             unit_number: unit.unit_number,
             customer_id: uploadCustomer?.customer_id ?? 0,
             customer_name: uploadCustomer?.customer_name,

@@ -13,6 +13,8 @@ import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 import {
   getSettlementInvoices,
   changeInvoiceItemRefundStatus,
@@ -26,6 +28,7 @@ import { getRefundItemActions } from './utils';
 const LIMIT = 10;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   invoice_number: z.string().optional(),
   invoice_number_item: z.string().optional(),
   invoice_status_id: z.string().optional(),
@@ -135,6 +138,7 @@ export default function InvoicesRefundPage() {
   const tRefund = useTranslations('invoices.refund');
   const tDetail = useTranslations('invoices.detail');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const { data: dropdowns } = useDropdowns();
   const { success: showSuccess, error: showError } = useResponseMessage();
 
@@ -194,6 +198,7 @@ export default function InvoicesRefundPage() {
       try {
         const data = await getSettlementInvoices(
           {
+            project_id: projectFilterParam(params.project_id),
             invoice_number: params.invoice_number || undefined,
             invoice_number_item: params.invoice_number_item || undefined,
             invoice_status_id: params.invoice_status_id
@@ -317,6 +322,7 @@ export default function InvoicesRefundPage() {
 
   // ── Form fields & buttons ────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'invoice_number',
       label: t('columns.invoiceNumber'),
@@ -534,6 +540,7 @@ export default function InvoicesRefundPage() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           invoice_number: '',
           invoice_number_item: '',
           invoice_status_id: '',

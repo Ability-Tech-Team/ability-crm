@@ -7,6 +7,7 @@ import Form from '@/src/components/Form';
 import SectionHeader from '@/src/components/SectionHeader';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import EntryNotice from '../../_shared/components/EntryNotice';
+import { useSubProjectOptions } from '../../_shared/hooks/useSubProjectOptions';
 import {
   flattenLocationOptions,
   subProjectIdOptions,
@@ -20,17 +21,18 @@ import { UNIT_ENTRY_INITIAL_VALUES } from '../utils';
 export default function UnitEntryForm() {
   const t = useTranslations('imports.entry');
   const { data: dropdowns } = useDropdowns();
+  const subProjects = useSubProjectOptions();
   const { save, notice, clearNotice, formKey } = useUnitEntry();
 
   const schema = useMemo(() => createUnitEntrySchema(t), [t]);
   const fields = useMemo(
     () =>
       getUnitEntryFields(t, {
-        subProjects: subProjectIdOptions(dropdowns?.sub_projects),
+        subProjects: subProjectIdOptions(subProjects),
         unitTypes: toSelectOptions(dropdowns?.unit_types),
         locations: flattenLocationOptions(dropdowns?.locations),
       }),
-    [dropdowns?.locations, dropdowns?.sub_projects, dropdowns?.unit_types, t],
+    [dropdowns?.locations, subProjects, dropdowns?.unit_types, t],
   );
 
   return (

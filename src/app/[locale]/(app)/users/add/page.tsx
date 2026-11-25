@@ -22,6 +22,8 @@ import type { SelectOption } from '@/src/components/ui/Select';
 import type { DropdownOption } from '@/src/types/dropdowns';
 import { useRouter } from '@/src/i18n/navigation';
 import { useResponseMessage } from '@/src/hooks/useResponseMessage';
+import { useIsSuperAdmin } from '@/src/hooks/useIsSuperAdmin';
+import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
 
 const requiredNumericSelect = (requiredMessage: string) =>
   z
@@ -60,6 +62,9 @@ const addUserSchema = z.object({
   safe_id: optionalSelectString,
   employee_type_id: requiredNumericSelect('Employee type is required'),
   manager_id: optionalSelectString,
+  // The Super Admin's choice only (`project_id` on POST /employees); a user
+  // works in their role's project, so the role must belong to it.
+  project_id: optionalSelectString,
 });
 
 type AddUserFormData = z.infer<typeof addUserSchema>;
@@ -121,17 +126,73 @@ export default function AddUser() {
 
   // ── Dropdowns ────────────────────────────────────────────────
   const { data: dropdowns } = useDropdowns();
-  const [roles, setRoles] = useState<SelectOption[]>([]);
+  const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
     getRoles({ limit: 1000 }, controller.signal)
-      .then(({ roles: items }) =>
-        setRoles(items.map((r: RoleItem) => ({ value: r.id, label: r.name }))),
-      )
+      .then(({ roles: items }) => setRoleItems(items))
       .catch(() => {});
     return () => controller.abort();
   }, []);
+
+  // ── The user's project (the Super Admin only) ────────────────
+  // Everyone else creates users in their own project and sees its roles only.
+  const isSuperAdmin = useIsSuperAdmin();
+  const scopeProjects = useProjectScopeStore((s) => s.projects);
+  const scopeProjectId = useProjectScopeStore((s) => s.projectId);
+  const defaultProjectId = isEditMode
+    ? employee?.project_id != null
+      ? String(employee.project_id)
+      : ''
+    : scopeProjectId !== null
+      ? String(scopeProjectId)
+      : '';
+  const [chosenProjectId, setChosenProjectId] = useState<string | null>(null);
+  const projectId = chosenProjectId ?? defaultProjectId;
+  const projectOptions: SelectOption[] = scopeProjects.map((project) => ({
+    value: String(project.id),
+    label: project.name,
+  }));
+
+  const roles = useMemo<SelectOption[]>(
+    () =>
+      roleItems
+        .filter(
+          (role) =>
+            !isSuperAdmin ||
+            !projectId ||
+            role.project_id == null ||
+            String(role.project_id) === projectId,
+        )
+        .map((role) => ({ value: role.id, label: role.name })),
+    [isSuperAdmin, projectId, roleItems],
+  );
+
+  const validationSchema = useMemo(() => {
+    if (!isSuperAdmin) return addUserSchema;
+    const projectOfRole = new Map(
+      roleItems.map((role) => [role.id, role.project_id]),
+    );
+    return addUserSchema.superRefine((values, ctx) => {
+      if (!values.project_id) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['project_id'],
+          message: t('projectRequired'),
+        });
+        return;
+      }
+      const roleProjectId = projectOfRole.get(values.role_id);
+      if (roleProjectId != null && String(roleProjectId) !== values.project_id) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['role_id'],
+          message: t('roleNotInProject'),
+        });
+      }
+    });
+  }, [isSuperAdmin, roleItems, t]);
 
   const positionOptions = toSelectOptions(dropdowns?.positions);
   const departmentOptions = toSelectOptions(dropdowns?.departments);
@@ -211,6 +272,19 @@ export default function AddUser() {
       fieldType: 'select',
       options: genderOptions,
     },
+    ...(isSuperAdmin
+      ? [
+          {
+            name: 'project_id',
+            label: tForm('project'),
+            placeholder: tForm('project'),
+            fieldType: 'select' as const,
+            options: projectOptions,
+            // Set when the user is created; a role change keeps the project.
+            disabled: isEditMode,
+          },
+        ]
+      : []),
     {
       name: 'role_id',
       label: tForm('role'),
@@ -313,6 +387,9 @@ export default function AddUser() {
           ...(data.safe_id ? { safe_id: Number(data.safe_id) } : {}),
           manager_id: data.manager_id || undefined,
           role_id: data.role_id,
+          ...(isSuperAdmin && data.project_id
+            ? { project_id: Number(data.project_id) }
+            : {}),
         };
 
         await createEmployee(payload);
@@ -344,6 +421,7 @@ export default function AddUser() {
         manager_id: employee.manager_id ?? '',
         is_male: String(employee.is_male ?? ''),
         role_id: employee.role_id ?? '',
+        project_id: defaultProjectId,
       };
     }
     return {
@@ -358,8 +436,9 @@ export default function AddUser() {
       manager_id: '',
       is_male: '',
       role_id: '',
+      project_id: defaultProjectId,
     };
-  }, [isEditMode, employee]);
+  }, [isEditMode, employee, defaultProjectId]);
 
   if ((isEditMode && !canEditUser) || (!isEditMode && !canCreateUser)) {
     return (
@@ -385,8 +464,11 @@ export default function AddUser() {
         fields={fields}
         buttons={buttons}
         initialValues={initialValues}
-        validationSchema={addUserSchema}
+        validationSchema={validationSchema}
         onSubmit={handleSubmit}
+        onFieldChange={(name, value) => {
+          if (name === 'project_id') setChosenProjectId(value);
+        }}
       />
     </div>
   );

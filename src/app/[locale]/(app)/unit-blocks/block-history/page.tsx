@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
 import { History } from 'lucide-react';
 import AccessDenied from '@/src/components/AccessDenied';
 import Form from '@/src/components/Form';
@@ -19,6 +20,7 @@ import {
 export default function UnitBlockHistoryPage() {
   const t = useTranslations('unitBlocks');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const tCommon = useTranslations('common');
   // The attachments dialog is shared with complaints, labels included.
   const tComplaints = useTranslations('complaints');
@@ -56,7 +58,7 @@ export default function UnitBlockHistoryPage() {
         // which is the single trigger for a fetch on this page.
         key={activeTab.id}
         title={t('blockHistory.title')}
-        fields={getHistoryFields(t, tForm, tCommon)}
+        fields={getHistoryFields(t, tForm, tCommon, projectFilter.fields)}
         buttons={getHistoryButtons(tForm)}
         headerContent={
           <div className="flex gap-1">

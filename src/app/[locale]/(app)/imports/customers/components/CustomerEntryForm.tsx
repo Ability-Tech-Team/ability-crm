@@ -8,6 +8,7 @@ import SectionHeader from '@/src/components/SectionHeader';
 import ConfirmModal from '@/src/components/ui/ConfirmModal';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import EntryNotice from '../../_shared/components/EntryNotice';
+import { useSubProjectOptions } from '../../_shared/hooks/useSubProjectOptions';
 import {
   OWNERSHIP_OWNER,
   OWNERSHIP_OWNER_RELATIVE,
@@ -22,6 +23,7 @@ import { customerEntryInitialValues } from '../utils';
 export default function CustomerEntryForm() {
   const t = useTranslations('imports.entry');
   const { data: dropdowns } = useDropdowns();
+  const subProjects = useSubProjectOptions();
   const {
     save,
     notice,
@@ -53,7 +55,7 @@ export default function CustomerEntryForm() {
         maritalStatuses: toSelectOptions(dropdowns?.marital_statuses),
         religions: toSelectOptions(dropdowns?.religions),
         customerTypes: toSelectOptions(dropdowns?.customer_types),
-        subProjects: subProjectCodeOptions(dropdowns?.sub_projects),
+        subProjects: subProjectCodeOptions(subProjects),
         // Relatives have their own form, which records the relation too.
         ownerships: toSelectOptions(dropdowns?.ownership_types, [
           OWNERSHIP_OWNER_RELATIVE,
@@ -61,7 +63,7 @@ export default function CustomerEntryForm() {
         ownerTypes: toSelectOptions(dropdowns?.owner_types),
         showOwnerType: isOwner,
       }),
-    [dropdowns, isOwner, t],
+    [dropdowns, isOwner, subProjects, t],
   );
 
   return (

@@ -88,6 +88,23 @@ describe('canAccessAppPath', () => {
     expect(canAccessAppPath('/definitions/department', indexes)).toBe(false);
   });
 
+  it('opens the projects definitions for the Super Admin only, whatever the tree holds', () => {
+    expect(canAccessAppPath('/definitions/projects', indexes, { isSuperAdmin: true })).toBe(true);
+    expect(canAccessAppPath('/ar/definitions/sub-projects', indexes, { isSuperAdmin: true })).toBe(true);
+    expect(canAccessAppPath('/definitions/projects', indexes)).toBe(false);
+    expect(canAccessAppPath('/definitions/sub-projects', indexes, { isSuperAdmin: false })).toBe(false);
+    const withItem = buildCurrentUserPrivilegeIndexes([
+      {
+        id: 3,
+        menuName: 'Definitions',
+        menuitems: [
+          { id: 39, name: 'Projects', href: '/definitions/projects', privileges: [active(PRIVILEGE_IDS.READ, 'Read')] },
+        ],
+      },
+    ]);
+    expect(canAccessAppPath('/definitions/projects', withItem)).toBe(false);
+  });
+
   it('denies paths without a rule (fails closed)', () => {
     expect(canAccessAppPath('/something-new', indexes)).toBe(false);
   });
@@ -100,7 +117,11 @@ describe('canAccessAppPath', () => {
 });
 
 describe('buildSidebarMenu', () => {
-  const labels = { importUnitDebts: 'Import Unit Debts' };
+  const labels = {
+    importUnitDebts: 'Import Unit Debts',
+    projects: 'Projects',
+    subProjects: 'Sub-projects',
+  };
   const items = buildSidebarMenu(MENUS, labels);
 
   it('shows only screens with an active privilege', () => {
@@ -157,6 +178,22 @@ describe('buildSidebarMenu', () => {
       ...(item.subItems?.map((sub) => sub.href) ?? []),
     ]);
     expect(hrefs).not.toContain('/imports/unit-debts');
+  });
+
+  it('adds Projects and Sub-projects to the Definitions menu for the Super Admin only', () => {
+    const definitionsHrefs = (isSuperAdmin: boolean) =>
+      buildSidebarMenu(MENUS, labels, { isSuperAdmin })
+        .find((item) => item.id === '3')
+        ?.subItems?.map((sub) => sub.href) ?? [];
+    expect(definitionsHrefs(true)).toEqual([
+      '/definitions/location',
+      '/definitions/projects',
+      '/definitions/sub-projects',
+    ]);
+    // Without them the one screen left is a direct link.
+    expect(buildSidebarMenu(MENUS, labels).find((item) => item.id === '3')).toMatchObject({
+      href: '/definitions/location',
+    });
   });
 
   it('recognizes the Logs and Imports menus by their screens, not their ids', () => {

@@ -1,4 +1,5 @@
 import api from '@/src/lib/http';
+import { projectScopeParam } from '@/src/lib/projectScope';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -58,7 +59,8 @@ export async function getUnitMedia(
 ): Promise<GetUnitMediaResponse> {
   const response = await api.get<GetUnitMediaRaw>('/projects/units/media', {
     params: {
-      ...(params.project_id ? { project_id: params.project_id } : {}),
+      // Required from the Super Admin (src/lib/projectScope.ts).
+      ...projectScopeParam(params.project_id),
       ...(params.unit_id ? { unit_id: params.unit_id } : {}),
       ...(params.unit_number ? { unit_number: params.unit_number } : {}),
       ...(params.media_type_id ? { media_type_id: params.media_type_id } : {}),
@@ -108,6 +110,8 @@ export interface UploadUnitMediaParams {
   /** Required since the SAP removal; `customer_code` is optional. */
   customer_id: number;
   customer_code?: string;
+  /** The unit's project; defaults to the Super Admin's scope. */
+  project_id?: number;
 }
 
 export async function uploadUnitMedia(
@@ -134,6 +138,8 @@ export async function uploadUnitMedia(
   formData.append('customer_id', String(params.customer_id));
   if (params.customer_code)
     formData.append('customer_code', params.customer_code);
+  const uploadProject = projectScopeParam(params.project_id).project_id;
+  if (uploadProject) formData.append('project_id', String(uploadProject));
 
   const response = await api.post('/projects/units/media/upload', formData, {
     headers: { 'Content-Type': undefined },
@@ -147,9 +153,10 @@ export async function uploadUnitMedia(
 
 export async function updateUnitMedia(
   id: string | number,
-  params: { file?: File; is_deleted?: number },
+  params: { file?: File; is_deleted?: number; project_id?: number },
 ): Promise<{ success: boolean }> {
   const file = params.file;
+  const project = projectScopeParam(params.project_id);
 
   if (file instanceof File) {
     const formData = new FormData();
@@ -157,6 +164,9 @@ export async function updateUnitMedia(
 
     if (params.is_deleted != null) {
       formData.append('is_deleted', String(params.is_deleted));
+    }
+    if (project.project_id) {
+      formData.append('project_id', String(project.project_id));
     }
 
     const response = await api.post(
@@ -173,6 +183,7 @@ export async function updateUnitMedia(
 
   const response = await api.post(`/projects/units/media/update/${id}`, {
     ...(params.is_deleted != null ? { is_deleted: params.is_deleted } : {}),
+    ...project,
   });
 
   return response.data;
@@ -180,6 +191,7 @@ export async function updateUnitMedia(
 
 export async function deleteUnitMedia(
   id: string | number,
+  projectId?: number,
 ): Promise<{ success: boolean }> {
-  return updateUnitMedia(id, { is_deleted: 1 });
+  return updateUnitMedia(id, { is_deleted: 1, project_id: projectId });
 }

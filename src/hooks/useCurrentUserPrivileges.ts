@@ -10,6 +10,7 @@ import {
   type PrivilegeRequirement,
 } from '@/src/lib/currentUserPrivileges';
 import { useCurrentUserPrivilegesStore } from '@/src/store/useCurrentUserPrivilegesStore';
+import { useIsSuperAdmin } from '@/src/hooks/useIsSuperAdmin';
 
 export function useCurrentUserPrivileges() {
   const data = useCurrentUserPrivilegesStore((state) => state.data);
@@ -24,6 +25,7 @@ export function useCurrentUserPrivileges() {
   const menuItemsById = useCurrentUserPrivilegesStore(
     (state) => state.menuItemsById,
   );
+  const isSuperAdmin = useIsSuperAdmin();
 
   return {
     data,
@@ -31,7 +33,11 @@ export function useCurrentUserPrivileges() {
     error,
     firstAccessibleHref: getFirstAccessibleHref(activeRouteHrefs),
     canAccessPath: (pathname: string) =>
-      canAccessAppPath(pathname, { activeRouteHrefs, menuItemsByHref }),
+      canAccessAppPath(
+        pathname,
+        { activeRouteHrefs, menuItemsByHref },
+        { isSuperAdmin },
+      ),
     canAccessMenuHref: (href: string) =>
       canAccessMenuHref(href, activeRouteHrefs),
     hasPrivilegeForHref: (href: string, requirement: PrivilegeRequirement) =>

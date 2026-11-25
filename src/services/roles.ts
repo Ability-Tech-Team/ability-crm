@@ -9,6 +9,8 @@ export interface RoleItem {
   name: string;
   en_name?: string;
   ar_name?: string;
+  /** The role's project: a user works in their role's project. */
+  project_id?: number | null;
 }
 
 interface GetRolesRaw {

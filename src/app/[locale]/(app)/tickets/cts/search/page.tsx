@@ -13,10 +13,13 @@ import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { getCtsRecords, type CtsRecord } from '@/src/services/cts';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import CtsPrintCard from '@/src/components/CtsPrintCard';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
+import { projectFilterParam } from '@/src/lib/projectFilter';
 
 const LIMIT = 10;
 
 const searchSchema = z.object({
+  project_id: z.string().optional(),
   unit_number: z.string().optional(),
 });
 
@@ -25,6 +28,7 @@ type SearchFormData = z.infer<typeof searchSchema>;
 export default function CtsSearch() {
   const t = useTranslations('cts');
   const tForm = useTranslations('form');
+  const projectFilter = useProjectFilter();
   const router = useRouter();
   const ctsSearchPrivileges = useRoutePrivileges('/tickets/cts/search');
   const ctsAddPrivileges = useRoutePrivileges('/tickets/cts/add');
@@ -60,6 +64,7 @@ export default function CtsSearch() {
       try {
         const data = await getCtsRecords(
           {
+            project_id: projectFilterParam(params.project_id),
             unit_number: params.unit_number || undefined,
             page,
             limit,
@@ -116,6 +121,7 @@ export default function CtsSearch() {
     () =>
       searchParams
         ? {
+            project_id: projectFilterParam(searchParams.project_id),
             unit_number: searchParams.unit_number || undefined,
           }
         : {},
@@ -133,6 +139,7 @@ export default function CtsSearch() {
 
   // ── Form fields & buttons ────────────────────────────────────
   const fields: FieldConfig[] = [
+    ...projectFilter.fields,
     {
       name: 'unit_number',
       label: tForm('unitNumber'),
@@ -271,6 +278,7 @@ export default function CtsSearch() {
         fields={fields}
         buttons={buttons}
         initialValues={{
+          project_id: projectFilter.initialValue,
           unit_number: '',
         }}
         validationSchema={searchSchema}

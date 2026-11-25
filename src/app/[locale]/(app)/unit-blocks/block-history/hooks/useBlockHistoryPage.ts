@@ -8,6 +8,7 @@ import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import { getUnitBlocks, type UnitBlock } from '@/src/services/unitBlocks';
 import { LIMIT, TABS } from '../schema';
 import type { HistoryFormData, HistorySearchParams, TabId } from '../types';
+import { useProjectFilter } from '@/src/hooks/useProjectFilter';
 import { buildHistoryParams, getHistoryInitialValues } from '../utils';
 
 export function useBlockHistoryPage() {
@@ -24,7 +25,11 @@ export function useBlockHistoryPage() {
   // 63/64 hang off the /unit-blocks/add menu item, not /unit-blocks/search.
   const blockTypePrivileges = useRoutePrivileges('/unit-blocks/add');
 
-  const initialValues = getHistoryInitialValues(searchParamsFromUrl);
+  const projectFilter = useProjectFilter();
+  const initialValues = getHistoryInitialValues(
+    searchParamsFromUrl,
+    projectFilter.initialValue,
+  );
 
   // ── Active tab ───────────────────────────────────────────────
   const [selectedTabId, setSelectedTabId] = useState<TabId>(

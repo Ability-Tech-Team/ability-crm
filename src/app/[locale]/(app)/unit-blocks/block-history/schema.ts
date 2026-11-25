@@ -29,6 +29,7 @@ export const TABS: HistoryTab[] = [
 
 /** Every filter is optional: left blank it is simply not sent. */
 export const historySchema = z.object({
+  project_id: z.string().optional(),
   unit_id: z.string().optional(),
   unit_number: z.string().optional(),
   is_active: z.string().optional(),
@@ -41,8 +42,11 @@ export function getHistoryFields(
   t: Translate,
   tForm: Translate,
   tCommon: Translate,
+  /** The Super Admin's Project filter (`useProjectFilter`); empty for everyone else. */
+  projectFields: FieldConfig[] = [],
 ): FieldConfig[] {
   return [
+    ...projectFields,
     {
       name: 'unit_number',
       label: t('columns.unitNumber'),

@@ -23,6 +23,8 @@ export type ModalField = {
   min?: string | number;
   max?: string | number;
   step?: string | number;
+  /** For text fields: the longest value the API accepts. */
+  maxLength?: number;
   disabled?: boolean;
   /** For select-type fields */
   options?: SelectOption[];
@@ -252,6 +254,7 @@ function AddEntryModalContent({
                 min={field.min}
                 max={field.max}
                 step={field.step}
+                maxLength={field.maxLength}
                 disabled={field.disabled}
                 errors={errors[field.name]}
               />

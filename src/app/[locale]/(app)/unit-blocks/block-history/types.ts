@@ -16,6 +16,7 @@ export type HistoryFormData = z.infer<typeof historySchema>;
 
 /** What reaches `getUnitBlocks`, once the form's strings are converted. */
 export type HistorySearchParams = {
+  project_id?: number;
   unit_id?: number;
   unit_number?: string;
   is_active?: number;
