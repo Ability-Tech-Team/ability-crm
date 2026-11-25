@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSessionStore } from '@/src/store/useSessionStore';
+import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
 import {
   createNamespacedSocket,
   type SocketErrorPayload,
@@ -24,6 +24,8 @@ export type TicketsLatestPayload = {
   notifications?: TicketNotification[];
   event_type?: string;
   ticket_id?: number;
+  /** Every active row of the scope; `notifications` holds the newest 100. */
+  count?: number;
 };
 
 export type TicketsSubscribedPayload = {
@@ -50,13 +52,13 @@ export type UseTicketNotificationsSocketResult = {
   } | null;
 };
 
-const TOKEN_FAILURE_CODES = new Set(['INVALID_TOKEN', 'TOKEN_EXPIRED']);
-
 export function useTicketNotificationsSocket({
   enabled,
   locale,
 }: UseTicketNotificationsSocketOptions): UseTicketNotificationsSocketResult {
-  const markSessionEnded = useSessionStore((state) => state.markSessionEnded);
+  // The Super Admin's working project (null for everyone else), as the HTTP
+  // feed sends it; a switch subscribes again.
+  const projectId = useProjectScopeStore((state) => state.projectId);
 
   const [notifications, setNotifications] = useState<
     TicketNotification[] | null
@@ -81,7 +83,10 @@ export function useTicketNotificationsSocket({
     const emitSubscribe = () => {
       // No token is sent: the HttpOnly auth cookie rides along on the
       // handshake (withCredentials) and the gateway reads it from there.
-      socket.emit('tickets:subscribe', {});
+      socket.emit(
+        'tickets:subscribe',
+        projectId === null ? {} : { project_id: projectId },
+      );
     };
 
     socket.on('connect', emitSubscribe);
@@ -90,7 +95,11 @@ export function useTicketNotificationsSocket({
       setStatus('disconnected');
     });
 
-    socket.on('connect_error', () => {
+    // A refused handshake carries the API's message_code (`data.code`). It
+    // never ends the session: the HTTP client's 401 handling decides that,
+    // and the dashboard's list still loads over HTTP.
+    socket.on('connect_error', (err: Error & { data?: SocketErrorPayload }) => {
+      setError(err.data ?? { message: err.message });
       setStatus('error');
     });
 
@@ -103,6 +112,9 @@ export function useTicketNotificationsSocket({
     });
 
     socket.on('tickets:latest', (payload: TicketsLatestPayload) => {
+      if (typeof payload?.count === 'number') {
+        setCount(payload.count);
+      }
       if (Array.isArray(payload?.notifications)) {
         setNotifications(
           payload.notifications.map((row) =>
@@ -120,9 +132,6 @@ export function useTicketNotificationsSocket({
     socket.on('tickets:error', (payload: SocketErrorPayload) => {
       setError(payload ?? { message: 'Unknown error' });
       setStatus('error');
-      if (payload?.code && TOKEN_FAILURE_CODES.has(payload.code)) {
-        markSessionEnded('expired');
-      }
     });
 
     socket.connect();
@@ -131,7 +140,7 @@ export function useTicketNotificationsSocket({
       socket.removeAllListeners();
       socket.disconnect();
     };
-  }, [enabled, markSessionEnded, locale]);
+  }, [enabled, locale, projectId]);
 
   return { notifications, status, error, count, lastEvent };
 }

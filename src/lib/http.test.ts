@@ -36,7 +36,6 @@ const envelope = (statusCode: number, message_code: string) => ({
 beforeEach(() => {
   setApiAddresses({
     baseUrl: 'http://172.20.1.141:9999',
-    socketOrigin: 'http://172.20.1.141:9999',
   });
   useSessionStore.setState({ mustChangePassword: false, endedReason: null });
   useMaintenanceStore.setState({ isMaintenance: false });
@@ -64,7 +63,7 @@ describe('the API client', () => {
   });
 
   it('sends nothing before the session names the API', async () => {
-    setApiAddresses({ baseUrl: '', socketOrigin: '' });
+    setApiAddresses({ baseUrl: '' });
     let called = false;
     api.defaults.adapter = async (config) => {
       called = true;

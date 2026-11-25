@@ -2327,6 +2327,21 @@
     "columnsLabel": "الأعمدة:",
     "resultTitle": "نتيجة الاستيراد",
     "resultPending": "تم قبول الملف. ستظهر نتيجته في سجل الاستيراد عند انتهاء المعالجة.",
+    "progress": {
+      "label": "تقدّم الاستيراد",
+      "uploadingStage": "جارٍ رفع الملف",
+      "uploading": "رفع الملف: {percent}",
+      "queued": "في انتظار بدء الاستيراد…",
+      "processing": "جارٍ الاستيراد…",
+      "reading": "جارٍ قراءة الملف…",
+      "checkingStage": "جارٍ فحص الصفوف",
+      "checking": "فحص الصفوف: {done} من {total}",
+      "writingStage": "جارٍ حفظ السجلات",
+      "writing": "حفظ السجلات: {done} من {total}",
+      "finished": "اكتمل الاستيراد",
+      "failed": "فشل الاستيراد: لم يُستورد أي شيء من هذا الملف.",
+      "rejectedRows": "الصفوف المرفوضة: {count}. نزّلها من سجل الاستيراد، وصحّحها، ثم ارفعها مرة أخرى."
+    },
     "viewHistory": "عرض سجل الاستيراد",
     "counts": {
       "insertedRows": "المضافة",

@@ -78,7 +78,6 @@ export default async function AppLayout({ children, params }: Props) {
       value={{
         details,
         apiBaseUrl: browserApiBaseUrl(apiBaseUrl, process.env.API_ALLOWED_URLS),
-        socketOrigin: new URL(apiBaseUrl).origin,
         portalBaseUrl,
       }}
     >

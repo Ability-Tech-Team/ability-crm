@@ -9,9 +9,14 @@ import Button from '@/src/components/ui/Button';
 import MainBox from '@/src/components/ui/MainBox';
 import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { Link } from '@/src/i18n/navigation';
-import { hasImportTemplate, type ImportKind } from '@/src/services/imports';
+import {
+  hasImportTemplate,
+  isFinishedImportStatus,
+  type ImportKind,
+} from '@/src/services/imports';
 import { useImportUpload } from '../hooks/useImportUpload';
 import ImportCounts from './ImportCounts';
+import ImportProgress from './ImportProgress';
 import TemplateDownloadButton from './TemplateDownloadButton';
 
 const ACCEPTED_TYPES =
@@ -42,8 +47,21 @@ export default function ImportUploadPage({
   const historyPrivileges = useRoutePrivileges('/imports/history');
   const inputId = useId();
   const hintId = useId();
-  const { file, selectFile, isUploading, result, hasUploaded, handleUpload } =
-    useImportUpload(kind);
+  const {
+    file,
+    selectFile,
+    phase,
+    isUploading,
+    uploadFraction,
+    result,
+    acceptedCount,
+    hasUploaded,
+    handleUpload,
+  } = useImportUpload(kind);
+  // The worker's counts, once it has finished with the sheet.
+  const finishedRecord =
+    result && isFinishedImportStatus(result.status) ? result : null;
+  const rejectedRows = finishedRecord?.failedRows ?? 0;
 
   if (!privileges.canAccess) {
     return <AccessDenied fallbackHref={privileges.firstAccessibleHref} />;
@@ -84,34 +102,48 @@ export default function ImportUploadPage({
               {t('fileLabel')}
             </label>
             <input
-              key={hasUploaded ? 'uploaded' : 'pending'}
+              key={acceptedCount}
               id={inputId}
               type="file"
               accept={ACCEPTED_TYPES}
               aria-describedby={hintId}
+              disabled={isUploading}
               onChange={(event) => selectFile(event.target.files?.[0] ?? null)}
               className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:me-3 file:rounded-md file:border-0 file:bg-sky-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-sky-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             />
           </div>
-          <Button type="submit" disabled={!file} isLoading={isUploading}>
+          <Button
+            type="submit"
+            disabled={!file || isUploading}
+            isLoading={isUploading}
+          >
             <Upload size={16} />
             {t('upload')}
           </Button>
         </form>
       </MainBox>
 
-      {hasUploaded ? (
+      {phase !== 'idle' ? (
         <MainBox>
-          <div role="status" className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold text-slate-800">
               {t('resultTitle')}
             </h2>
-            {result ? (
-              <ImportCounts record={result} />
-            ) : (
+            <ImportProgress
+              phase={phase}
+              uploadFraction={uploadFraction}
+              record={result}
+            />
+            {finishedRecord ? <ImportCounts record={finishedRecord} /> : null}
+            {rejectedRows > 0 ? (
+              <p className="text-sm text-amber-800">
+                {t('progress.rejectedRows', { count: rejectedRows })}
+              </p>
+            ) : null}
+            {phase === 'finished' && !finishedRecord ? (
               <p className="text-sm text-slate-600">{t('resultPending')}</p>
-            )}
-            {historyPrivileges.canAccess ? (
+            ) : null}
+            {hasUploaded && historyPrivileges.canAccess ? (
               <Link
                 href="/imports/history"
                 className="inline-flex items-center gap-2 text-sm font-medium text-sky-700 underline-offset-4 hover:underline"

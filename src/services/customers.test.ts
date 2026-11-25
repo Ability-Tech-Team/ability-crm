@@ -24,7 +24,6 @@ function answer(
 beforeEach(() => {
   setApiAddresses({
     baseUrl: 'http://172.20.1.141:9999',
-    socketOrigin: 'http://172.20.1.141:9999',
   });
   useSessionStore.setState({ mustChangePassword: false, endedReason: null });
 });

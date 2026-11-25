@@ -78,7 +78,7 @@ describe('the projects answers', () => {
   });
 
   it('lists every project at once, with the search when one is given', async () => {
-    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999', socketOrigin: 'http://172.20.1.141:9999' });
+    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999' });
     let seen: InternalAxiosRequestConfig | undefined;
     api.defaults.adapter = answer(
       { result: { total_count: 0, total_pages: 0, projects: [] }, success: true, statusCode: 200 },
@@ -94,7 +94,7 @@ describe('the projects answers', () => {
 
 describe('the projects the header offers', () => {
   it('falls back to the Super Admin\'s projects list where the API has no accessible route', async () => {
-    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999', socketOrigin: 'http://172.20.1.141:9999' });
+    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999' });
     const urls: string[] = [];
     api.defaults.adapter = async (config) => {
       urls.push(String(config.url));

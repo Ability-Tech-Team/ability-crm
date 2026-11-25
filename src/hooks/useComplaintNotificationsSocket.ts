@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSessionStore } from '@/src/store/useSessionStore';
+import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
 import {
   createNamespacedSocket,
   type SocketErrorPayload,
@@ -18,6 +18,8 @@ export type ComplainsLatestPayload = {
   notifications?: ComplaintNotification[];
   event_type?: string;
   complain_id?: number;
+  /** Every active row of the scope; `notifications` holds the newest 100. */
+  count?: number;
 };
 
 export type ComplainsSubscribedPayload = {
@@ -44,13 +46,13 @@ export type UseComplaintNotificationsSocketResult = {
   } | null;
 };
 
-const TOKEN_FAILURE_CODES = new Set(['INVALID_TOKEN', 'TOKEN_EXPIRED']);
-
 export function useComplaintNotificationsSocket({
   enabled,
   locale,
 }: UseComplaintNotificationsSocketOptions): UseComplaintNotificationsSocketResult {
-  const markSessionEnded = useSessionStore((state) => state.markSessionEnded);
+  // The Super Admin's working project (null for everyone else), as the HTTP
+  // feed sends it; a switch subscribes again.
+  const projectId = useProjectScopeStore((state) => state.projectId);
 
   const [notifications, setNotifications] = useState<
     ComplaintNotification[] | null
@@ -75,7 +77,10 @@ export function useComplaintNotificationsSocket({
     const emitSubscribe = () => {
       // No token is sent: the HttpOnly auth cookie rides along on the
       // handshake (withCredentials) and the gateway reads it from there.
-      socket.emit('complains:subscribe', {});
+      socket.emit(
+        'complains:subscribe',
+        projectId === null ? {} : { project_id: projectId },
+      );
     };
 
     socket.on('connect', emitSubscribe);
@@ -84,7 +89,11 @@ export function useComplaintNotificationsSocket({
       setStatus('disconnected');
     });
 
-    socket.on('connect_error', () => {
+    // A refused handshake carries the API's message_code (`data.code`). It
+    // never ends the session: the HTTP client's 401 handling decides that,
+    // and the dashboard's list still loads over HTTP.
+    socket.on('connect_error', (err: Error & { data?: SocketErrorPayload }) => {
+      setError(err.data ?? { message: err.message });
       setStatus('error');
     });
 
@@ -97,6 +106,9 @@ export function useComplaintNotificationsSocket({
     });
 
     socket.on('complains:latest', (payload: ComplainsLatestPayload) => {
+      if (typeof payload?.count === 'number') {
+        setCount(payload.count);
+      }
       if (Array.isArray(payload?.notifications)) {
         setNotifications(
           payload.notifications.map((row) =>
@@ -114,9 +126,6 @@ export function useComplaintNotificationsSocket({
     socket.on('complains:error', (payload: SocketErrorPayload) => {
       setError(payload ?? { message: 'Unknown error' });
       setStatus('error');
-      if (payload?.code && TOKEN_FAILURE_CODES.has(payload.code)) {
-        markSessionEnded('expired');
-      }
     });
 
     socket.connect();
@@ -125,7 +134,7 @@ export function useComplaintNotificationsSocket({
       socket.removeAllListeners();
       socket.disconnect();
     };
-  }, [enabled, markSessionEnded, locale]);
+  }, [enabled, locale, projectId]);
 
   return { notifications, status, error, count, lastEvent };
 }

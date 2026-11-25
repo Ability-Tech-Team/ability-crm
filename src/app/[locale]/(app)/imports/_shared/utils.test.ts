@@ -4,14 +4,19 @@ import {
   ID_TYPE_NATIONAL_ID,
   ID_TYPE_PASSPORT,
   idNumberProblem,
+  importPhase,
+  isImportPhaseDone,
+  nextImportPollDelay,
   optionalId,
   optionalInt,
   optionalText,
   pickUnit,
   subProjectCodeOptions,
   todayIsoDate,
+  toPercent,
   toSelectOptions,
 } from './utils';
+import type { ImportRecord } from '@/src/services/imports';
 
 const unit = (id: number, subProjectCode?: string) => ({
   id,
@@ -123,5 +128,58 @@ describe('select options', () => {
       { value: '1', label: 'Zone A' },
       { value: '2', label: 'Zone A > Building 3' },
     ]);
+  });
+});
+
+describe('an upload on the Imports screens', () => {
+  const record = (
+    status: string | null,
+    progress: ImportRecord['progress'] = null,
+  ): ImportRecord => ({
+    id: 1,
+    kind: 'units',
+    fileName: 'units.xlsx',
+    status,
+    totalRows: null,
+    insertedRows: null,
+    updatedRows: null,
+    skippedRows: null,
+    failedRows: null,
+    createdAt: null,
+    createdBy: null,
+    progress,
+  });
+
+  it('waits while the import is queued, and shows it running once the worker reports', () => {
+    expect(importPhase(record('PENDING'))).toBe('queued');
+    expect(importPhase(record(null))).toBe('queued');
+    expect(importPhase(record('PROCESSING'))).toBe('processing');
+    expect(
+      importPhase(
+        record('PENDING', { stage: 'reading', done: 0, total: 0, percent: 0 }),
+      ),
+    ).toBe('processing');
+  });
+
+  it('ends on the worker\'s outcome, rejected rows or not', () => {
+    expect(importPhase(record('COMPLETED'))).toBe('finished');
+    expect(importPhase(record('completed_with_errors'))).toBe('finished');
+    expect(importPhase(record('FAILED'))).toBe('failed');
+    expect(isImportPhaseDone('finished')).toBe(true);
+    expect(isImportPhaseDone('failed')).toBe(true);
+    expect(isImportPhaseDone('processing')).toBe(false);
+  });
+
+  it('asks every 2 seconds, backing off to 10 after failed asks', () => {
+    expect([0, 1, 2, 3, 9].map(nextImportPollDelay)).toEqual([
+      2000, 4000, 8000, 10_000, 10_000,
+    ]);
+  });
+
+  it('shows whole percentages from 0 to 100', () => {
+    expect(toPercent(0.456)).toBe(46);
+    expect(toPercent(1.2)).toBe(100);
+    expect(toPercent(-1)).toBe(0);
+    expect(toPercent(Number.NaN)).toBe(0);
   });
 });

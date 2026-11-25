@@ -10,6 +10,9 @@ import { ApiError, readEnvelopeFailure } from '@/src/lib/apiErrors';
  * (`GET /imports/:id/errors`), and the empty sheets to fill
  * (`GET /imports/<kind>/template`). Re-uploading a customers sheet updates
  * what it carries, so each import reports inserted, updated, and skipped rows.
+ *
+ * An upload only queues the sheet; the API's import worker reads it later.
+ * While it runs, `GET /imports/:id` carries its `progress`.
  */
 
 export const IMPORT_KINDS = [
@@ -21,6 +24,18 @@ export const IMPORT_KINDS = [
 
 export type ImportKind = (typeof IMPORT_KINDS)[number];
 
+/** Where a running import is: reading the file, checking its rows, or writing the valid ones. */
+export type ImportStage = 'reading' | 'checking' | 'writing';
+
+export type ImportProgress = {
+  stage: ImportStage;
+  /** Rows checked, or records written, so far. */
+  done: number;
+  total: number;
+  /** The whole import's percentage (the API weighs the stages). */
+  percent: number;
+};
+
 export type ImportRecord = {
   id: number;
   kind: string | null;
@@ -30,17 +45,42 @@ export type ImportRecord = {
   insertedRows: number | null;
   updatedRows: number | null;
   skippedRows: number | null;
+  /** Rows rejected; the history offers them as a file. */
+  failedRows: number | null;
   createdAt: string | null;
   createdBy: string | null;
+  /** While the import is queued or running; null otherwise or when unknown. */
+  progress: ImportProgress | null;
 };
+
+/** The statuses the import worker leaves an import in (`IMPORT_STATUS` in the API). */
+const FINISHED_STATUSES = new Set([
+  'COMPLETED',
+  'COMPLETED_WITH_ERRORS',
+  'FAILED',
+]);
+
+export function isFinishedImportStatus(status: string | null): boolean {
+  return status !== null && FINISHED_STATUSES.has(status.toUpperCase());
+}
 
 const count = z.union([z.number(), z.string()]).nullish();
 const text = z.string().nullish();
+const idValue = z.union([z.number(), z.string().regex(/^\d+$/)]);
+
+const progressSchema = z.object({
+  stage: z.enum(['reading', 'checking', 'writing']),
+  done: z.number().nonnegative(),
+  total: z.number().nonnegative(),
+  percent: z.number().min(0).max(100),
+});
 
 // Only the row counts are named by the backend's change list; the other
-// fields accept the spellings its other records use.
+// fields accept the spellings its other records use. The upload answers
+// `import_id` where the import's own routes answer `id`.
 const importRecordSchema = z.object({
-  id: z.union([z.number(), z.string().regex(/^\d+$/)]),
+  id: idValue.optional(),
+  import_id: idValue.optional(),
   type: text,
   import_type: text,
   file_name: text,
@@ -51,6 +91,9 @@ const importRecordSchema = z.object({
   inserted_rows: count,
   updated_rows: count,
   skipped_rows: count,
+  failed_rows: count,
+  // A progress the app can't read is left out rather than failing the record.
+  progress: progressSchema.nullish().catch(null),
   created_at: text,
   created_by_name: text,
   created_by: text,
@@ -70,9 +113,14 @@ export function toImportRecord(raw: unknown): ImportRecord | null {
   }
 
   const record = parsed.data;
+  const id = record.id ?? record.import_id;
+
+  if (id === undefined) {
+    return null;
+  }
 
   return {
-    id: Number(record.id),
+    id: Number(id),
     kind: record.type ?? record.import_type ?? null,
     fileName: record.file_name ?? record.original_name ?? null,
     status: record.status_name ?? record.status ?? null,
@@ -80,8 +128,10 @@ export function toImportRecord(raw: unknown): ImportRecord | null {
     insertedRows: toCount(record.inserted_rows),
     updatedRows: toCount(record.updated_rows),
     skippedRows: toCount(record.skipped_rows),
+    failedRows: toCount(record.failed_rows),
     createdAt: record.created_at ?? null,
     createdBy: record.created_by_name ?? record.created_by ?? null,
+    progress: record.progress ?? null,
   };
 }
 
@@ -109,9 +159,15 @@ function readList(result: unknown): { items: unknown[]; total: number | null } {
   };
 }
 
+export type UploadImportOptions = {
+  /** The share of the file sent so far, from 0 to 1. */
+  onUploadProgress?: (fraction: number) => void;
+};
+
 export async function uploadImport(
   kind: ImportKind,
   file: File,
+  { onUploadProgress }: UploadImportOptions = {},
 ): Promise<ImportRecord | null> {
   const formData = new FormData();
   formData.append('file', file);
@@ -125,6 +181,12 @@ export async function uploadImport(
     {
       headers: { 'Content-Type': undefined },
       transformRequest: [(data) => data],
+      onUploadProgress: onUploadProgress
+        ? (event) => {
+            const total = event.total ?? file.size;
+            if (total > 0) onUploadProgress(Math.min(event.loaded / total, 1));
+          }
+        : undefined,
     },
   );
 

@@ -7,13 +7,11 @@ import type { SessionDetails } from '@/src/lib/sessionDetails';
 export type SessionContextValue = {
   details: SessionDetails;
   /**
-   * Where the browser sends API calls: the client's Ability CRM API, already
-   * checked against the trusted list, or during `next dev` the proxy in
-   * front of it (src/lib/devApiProxy.ts).
+   * Where the browser sends API calls and opens the dashboards' sockets: the
+   * client's Ability CRM API, already checked against the trusted list, or
+   * during `next dev` the proxy in front of it (src/lib/devApiProxy.ts).
    */
   apiBaseUrl: string;
-  /** The API's own origin, for Socket.IO. */
-  socketOrigin: string;
   /** Where signed-out users go to sign in; null when not configured. */
   portalBaseUrl: string | null;
 };
@@ -31,10 +29,7 @@ export default function SessionProvider({
   // Set during render, not in an effect: the shell's children start their
   // requests in their own effects, which run before this component's.
   if (typeof window !== 'undefined') {
-    setApiAddresses({
-      baseUrl: value.apiBaseUrl,
-      socketOrigin: value.socketOrigin,
-    });
+    setApiAddresses({ baseUrl: value.apiBaseUrl });
   }
 
   return (

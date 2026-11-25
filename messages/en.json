@@ -2327,6 +2327,21 @@
     "columnsLabel": "Columns:",
     "resultTitle": "Import result",
     "resultPending": "The sheet was accepted. Its result appears in the import history when processing finishes.",
+    "progress": {
+      "label": "Import progress",
+      "uploadingStage": "Uploading the sheet",
+      "uploading": "Uploading the sheet: {percent}",
+      "queued": "Waiting for the import to start…",
+      "processing": "Importing…",
+      "reading": "Reading the sheet…",
+      "checkingStage": "Checking the rows",
+      "checking": "Checking rows: {done} of {total}",
+      "writingStage": "Saving the records",
+      "writing": "Saving records: {done} of {total}",
+      "finished": "Import finished",
+      "failed": "The import failed: nothing from this sheet was imported.",
+      "rejectedRows": "Rejected rows: {count}. Download them from the import history, correct them, and upload them again."
+    },
     "viewHistory": "View import history",
     "counts": {
       "insertedRows": "Inserted",

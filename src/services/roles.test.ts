@@ -47,7 +47,6 @@ const privileges = [
 beforeEach(() => {
   setApiAddresses({
     baseUrl: "http://127.0.0.1:3003/crm",
-    socketOrigin: "http://127.0.0.1:3003",
   });
 });
 

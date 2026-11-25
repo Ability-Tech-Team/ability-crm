@@ -107,29 +107,27 @@ export default function DashboardComplaintsPage() {
   const {
     notifications: liveNotifications,
     status,
+    count: liveCount,
     lastEvent,
   } = useComplaintNotificationsSocket({ enabled: true, locale });
 
-  const isFirstLatestRef = useRef(true);
   useEffect(() => {
-    if (!lastEvent) return;
-    // Skip beep on the initial snapshot delivered right after subscribing.
-    if (isFirstLatestRef.current) {
-      isFirstLatestRef.current = false;
-      return;
-    }
+    // No beep for the rows a (re)subscribe delivers, only for changes.
+    if (!lastEvent || lastEvent.type === 'SNAPSHOT') return;
     playNotificationSound();
   }, [lastEvent]);
 
-  // A new live snapshot replaces page 1; on other pages it only flags that
-  // newer items exist. Adjusted during render when the snapshot changes.
+  // A new live snapshot (the newest 100 rows) replaces page 1, cut to the
+  // page size; on other pages it only flags that newer items exist. Its count
+  // is the new total either way. Adjusted during render when it changes.
   const [seenLiveNotifications, setSeenLiveNotifications] =
     useState(liveNotifications);
   if (liveNotifications !== seenLiveNotifications) {
     setSeenLiveNotifications(liveNotifications);
     if (liveNotifications) {
+      if (liveCount !== null) setTotalCount(liveCount);
       if (currentPage === 1) {
-        setComplaints(liveNotifications);
+        setComplaints(liveNotifications.slice(0, pageSize));
         setHasPendingRealtime(false);
       } else {
         setHasPendingRealtime(true);

@@ -69,8 +69,10 @@ the workspace instead of assuming it exists.
     browser calls `/api/dev-proxy/crm/<n>`, which `next.config.ts` forwards
     to the n-th `API_ALLOWED_URLS` address (same-origin requests only), so
     the backend's cookie lands on `localhost` and no CORS entry is needed.
-    The layout passes `browserApiBaseUrl(...)` for HTTP calls and the API's
-    own origin for sockets (`setApiAddresses`). Builds have no rewrites.
+    The layout passes `browserApiBaseUrl(...)` (`setApiAddresses`), which
+    the HTTP calls and the dashboards' sockets share: the API serves
+    Socket.IO at `<apiUrl>/socket.io` (`src/lib/socket.ts`, 2026-11-25), so
+    under `next dev` the sockets ride the proxy too. Builds have no rewrites.
   - The logo goes through `/api/branding/logo`, because `/branding` signs it
     for 60 seconds; never cache or store that link.
   - `src/lib/http.ts`, `src/lib/apiErrors.ts`: the only API client. It
@@ -143,8 +145,9 @@ the workspace instead of assuming it exists.
   session cookie and its API address, the trusted-address check, route rules
   and the sidebar, refund actions, ownership payloads, phone input, imports,
   unit debt, logo addresses, base URLs, the log filters, support
-  requests, the Imports screens' manual entry forms, and the assistant chat
-  (state, storage, answers, the route's identity and failure handling).
+  requests, the Imports screens' manual entry forms and upload progress, the
+  dashboards' socket address, and the assistant chat (state, storage,
+  answers, the route's identity and failure handling).
 
 Commands, from this directory (details in `README.md`):
 

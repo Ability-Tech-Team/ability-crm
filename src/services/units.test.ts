@@ -52,7 +52,6 @@ describe('setUnitDebt', () => {
   it('posts the amount for the unit and returns the debt as saved', async () => {
     setApiAddresses({
       baseUrl: 'http://172.20.1.141:9999',
-      socketOrigin: 'http://172.20.1.141:9999',
     });
     let seen: InternalAxiosRequestConfig | undefined;
     api.defaults.adapter = answer(
@@ -87,7 +86,7 @@ describe('the project of a units call', () => {
   const listAnswer = { result: { units: [], totalCount: 0 }, success: true, statusCode: 200 };
 
   it('names the Super Admin\'s project, which the units routes require from them', async () => {
-    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999', socketOrigin: 'http://172.20.1.141:9999' });
+    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999' });
     useProjectScopeStore.setState({ projectId: 5, projects: [{ id: 5, name: 'North', active: true }] });
     let seen: InternalAxiosRequestConfig | undefined;
     api.defaults.adapter = answer(listAnswer, (config) => {
@@ -100,7 +99,7 @@ describe('the project of a units call', () => {
   });
 
   it('sends no project for anyone else', async () => {
-    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999', socketOrigin: 'http://172.20.1.141:9999' });
+    setApiAddresses({ baseUrl: 'http://172.20.1.141:9999' });
     let seen: InternalAxiosRequestConfig | undefined;
     api.defaults.adapter = answer(listAnswer, (config) => {
       seen = config;

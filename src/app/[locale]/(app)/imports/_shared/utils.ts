@@ -1,4 +1,8 @@
 import type { SelectOption } from '@/src/components/ui/Select';
+import {
+  isFinishedImportStatus,
+  type ImportRecord,
+} from '@/src/services/imports';
 import type { Unit } from '@/src/services/units';
 import type {
   DropdownOption,
@@ -165,4 +169,44 @@ export function unitPickMessage(
   if (problem === 'notInSubProject') return t('unitNotInSubProject', values);
   if (problem === 'ambiguous') return t('unitAmbiguous', values);
   return t('unitNotFound', values);
+}
+
+/**
+ * Where an upload stands on the upload screen: the file going up, then the
+ * import worker's run (`queued` until it starts, `processing` while it reads
+ * and writes), then its outcome.
+ */
+export type ImportPhase =
+  | 'idle'
+  | 'uploading'
+  | 'queued'
+  | 'processing'
+  | 'finished'
+  | 'failed';
+
+/** The phase an import record shows. An unknown status is still waiting. */
+export function importPhase(record: ImportRecord): ImportPhase {
+  const status = record.status?.toUpperCase() ?? null;
+  if (status === 'FAILED') return 'failed';
+  if (isFinishedImportStatus(status)) return 'finished';
+  if (status === 'PROCESSING' || record.progress) return 'processing';
+  return 'queued';
+}
+
+export function isImportPhaseDone(phase: ImportPhase): boolean {
+  return phase === 'finished' || phase === 'failed';
+}
+
+const POLL_MS = 2000;
+const MAX_POLL_MS = 10_000;
+
+/** How long to wait before asking for the import again: longer after each failed ask. */
+export function nextImportPollDelay(failures: number): number {
+  return Math.min(POLL_MS * 2 ** Math.max(failures, 0), MAX_POLL_MS);
+}
+
+/** A whole percentage from 0 to 100. */
+export function toPercent(fraction: number): number {
+  if (!Number.isFinite(fraction)) return 0;
+  return Math.round(Math.min(Math.max(fraction, 0), 1) * 100);
 }
