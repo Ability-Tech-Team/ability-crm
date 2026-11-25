@@ -27,7 +27,7 @@ import { browserSessionStorage } from '@/src/lib/assistantChat';
 import { storeProjectScope } from '@/src/lib/projectScope';
 import { isSuperAdminRole } from '@/src/lib/superAdmin';
 import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
-import Select from '@/src/components/ui/Select';
+import HeaderProjectPicker from './HeaderProjectPicker';
 
 interface Notification {
   id: string;
@@ -117,20 +117,10 @@ export default function Header() {
 
       <div className="flex justify-center min-w-0 px-2">
         {isSuperAdmin && scopeProjects.length ? (
-          <Select
-            label={t('project')}
-            name="header_project"
-            options={scopeProjects.map((project) => ({
-              value: String(project.id),
-              label: project.name,
-            }))}
-            value={scopeProjectId === null ? '' : String(scopeProjectId)}
-            clearable={false}
-            containerClassName="w-48 max-w-full text-start sm:w-64"
-            onChange={(event) => {
-              const projectId = Number(event.target.value);
-              if (!Number.isInteger(projectId) || projectId <= 0) return;
-              if (projectId === scopeProjectId) return;
+          <HeaderProjectPicker
+            projects={scopeProjects}
+            value={scopeProjectId}
+            onChange={(projectId) => {
               setScopeProjectId(projectId);
               storeProjectScope(browserSessionStorage(), employeeId, projectId);
             }}
