@@ -216,6 +216,9 @@ export default function AddUser() {
       label: tForm('username'),
       placeholder: tForm('username'),
       type: 'text',
+      // The API can't change a username (POST /employees/update/:id has no
+      // user_name and refuses one), so it is set when the user is created.
+      disabled: isEditMode,
     },
     {
       name: 'full_name',
@@ -344,9 +347,6 @@ export default function AddUser() {
           role_id: employee?.role_id ?? '',
         };
 
-        if (data.user_name !== originalValues.user_name) {
-          payload.user_name = data.user_name;
-        }
         if (data.full_name !== originalValues.full_name) {
           payload.full_name = data.full_name;
         }

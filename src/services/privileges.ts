@@ -39,8 +39,9 @@ export interface CreateRoleDto {
 
 export interface CreateRoleResponse {
   result: {
-    id: number;
-    name: string;
+    /** The new role's id (a UUID). */
+    id: string;
+    message?: string;
   };
   success: boolean;
 }
@@ -87,15 +88,47 @@ export function flattenMenuItems(
 }
 
 /**
- * Creates a new role with the specified privileges
+ * Saves a role's privileges (`POST /roles/assign-privilege-to-role`): `status`
+ * 1 grants one, 0 takes it back. The API refuses a privilege the editor's own
+ * role doesn't hold (`CANNOT_GRANT_UNHELD_PRIVILEGE`).
+ */
+export async function assignRolePrivileges(
+  roleId: string,
+  privileges: PrivilegeDto[],
+): Promise<void> {
+  if (!privileges.length) return;
+  await axios.post('/roles/assign-privilege-to-role', {
+    privileges: privileges.map((privilege) => ({
+      role_id: roleId,
+      menuitem_id: privilege.menuitem_id,
+      privilege_id: privilege.privilege_id,
+      status: privilege.status ?? 1,
+    })),
+  });
+}
+
+/**
+ * Creates a role with its privileges. Amer CRM's API took both in one call
+ * (`/create-role`); Ability CRM's takes the role (`POST /roles`, which refuses
+ * a `privileges` field) and then its privileges. A role whose privileges can't
+ * be saved is removed again, so a failed save leaves no empty role behind.
  */
 export async function createRole(
   payload: CreateRoleDto,
 ): Promise<CreateRoleResponse> {
-  const response = await axios.post<CreateRoleResponse>(
-    '/roles',
-    payload,
-  );
+  const { privileges, ...role } = payload;
+  const response = await axios.post<CreateRoleResponse>('/roles', role);
+  const roleId = response.data?.result?.id;
+  if (!roleId) throw new Error("The new role's id is missing from the answer");
+
+  try {
+    await assignRolePrivileges(String(roleId), privileges);
+  } catch (err) {
+    await axios
+      .post(`/roles/update/${roleId}`, { is_deleted: 1 })
+      .catch(() => undefined);
+    throw err;
+  }
 
   return response.data;
 }

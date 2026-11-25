@@ -1,6 +1,9 @@
 import api from '@/src/lib/http';
 import type { RolePrivilegesResponse } from '@/src/types/rolePrivileges';
-import type { CreateRoleDto } from '@/src/services/privileges';
+import {
+  assignRolePrivileges,
+  type CreateRoleDto,
+} from '@/src/services/privileges';
 
 // ─── List / Search ───────────────────────────────────────────────
 
@@ -80,11 +83,17 @@ export async function getRolePrivilegesById(
 
 // ─── Update role ─────────────────────────────────────────────────
 
+/**
+ * Saves a role's names, then its privileges (status 1 granted, 0 taken back),
+ * the two calls Ability CRM's API takes (`createRole` explains).
+ */
 export async function updateRole(
   roleId: string,
   payload: CreateRoleDto,
 ): Promise<void> {
-  await api.post(`/roles/update/${roleId}`, payload);
+  const { privileges, ...role } = payload;
+  await api.post(`/roles/update/${roleId}`, role);
+  await assignRolePrivileges(roleId, privileges);
 }
 
 // ─── Delete role (soft-delete via update endpoint) ───────────────

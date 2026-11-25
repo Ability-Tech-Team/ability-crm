@@ -18,8 +18,8 @@ export interface CreateEmployeeDto {
   project_id?: number;
 }
 
+/** `POST /employees/update/:id`'s fields; a username can't change. */
 export interface UpdateEmployeeDto {
-  user_name?: string;
   full_name?: string;
   phone_number?: string;
   is_male?: number;
