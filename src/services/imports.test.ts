@@ -53,10 +53,10 @@ describe('import files', () => {
     );
   });
 
-  it('offers a template for the units, customers, and relatives sheets only', () => {
+  it('offers a template for every sheet', () => {
     expect(hasImportTemplate('units')).toBe(true);
     expect(hasImportTemplate('customers')).toBe(true);
     expect(hasImportTemplate('relatives')).toBe(true);
-    expect(hasImportTemplate('unit-debts')).toBe(false);
+    expect(hasImportTemplate('unit-debts')).toBe(true);
   });
 });

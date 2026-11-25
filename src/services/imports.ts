@@ -154,7 +154,12 @@ export async function getImport(
 }
 
 /** The kinds with an empty sheet to download (`GET /imports/<kind>/template`). */
-export const IMPORT_TEMPLATE_KINDS = ['units', 'customers', 'relatives'] as const;
+export const IMPORT_TEMPLATE_KINDS = [
+  'units',
+  'customers',
+  'relatives',
+  'unit-debts',
+] as const;
 
 export type ImportTemplateKind = (typeof IMPORT_TEMPLATE_KINDS)[number];
 

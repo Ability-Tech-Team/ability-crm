@@ -401,3 +401,34 @@ export function getUnitDebitAmount(
   const value = Number(raw);
   return Number.isFinite(value) ? value : null;
 }
+
+export interface SavedUnitDebt {
+  debitAmount: number | null;
+  debtUpdatedAt: string | null;
+}
+
+/**
+ * Sets one unit's debt by hand (`POST /projects/units/debt/:unit_id`). It
+ * writes what a row of the unit debts sheet writes: the amount replaces the
+ * unit's debt. Answers the debt as saved.
+ */
+export async function setUnitDebt(
+  unitId: number,
+  debitAmount: number,
+): Promise<SavedUnitDebt> {
+  const response = await api.post<{
+    result?: { debit_amount?: unknown; debt_updated_at?: unknown } | null;
+  }>(`/projects/units/debt/${unitId}`, { debit_amount: debitAmount });
+  const result = response.data?.result;
+  const amount = result?.debit_amount;
+  return {
+    debitAmount:
+      typeof amount === 'number' || typeof amount === 'string'
+        ? getUnitDebitAmount({ debit_amount: amount })
+        : null,
+    debtUpdatedAt:
+      typeof result?.debt_updated_at === 'string'
+        ? result.debt_updated_at
+        : null,
+  };
+}

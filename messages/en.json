@@ -2340,7 +2340,7 @@
     "unit-debts": {
       "title": "Import unit debts",
       "description": "Upload each unit’s current debt. It replaces the debt shown on the unit and when creating an invoice.",
-      "columns": "unit_number, debit_amount, sub_project (optional)"
+      "columns": "unit_number and debit_amount (required), plus sub_project (the sub-project’s code). The amount replaces the unit’s debt and can be zero or negative (rounded to 2 decimals). A unit number used in more than one sub-project needs sub_project."
     },
     "history": {
       "title": "Import history",
@@ -2381,6 +2381,8 @@
       "unitNotFound": "No unit {unit} was found in this project. Add the unit first.",
       "unitNotInSubProject": "No unit {unit} was found in sub-project {subProject}.",
       "unitAmbiguous": "Several units are numbered {unit}. Choose the sub-project.",
+      "amountFormat": "Enter an amount, with up to 2 decimals.",
+      "amountRange": "The amount must be less than 1,000,000,000,000.",
       "units": {
         "title": "Add a unit manually",
         "description": "Adds one unit to this project with its specification. A unit number already used in the same sub-project is refused.",
@@ -2456,6 +2458,18 @@
         "sameAsOwner": "A relative can’t have the owner’s ID number.",
         "ownerNotFound": "No customer with ID number {idNumber} was found in this project. Add the owner first.",
         "saved": "{name} was added as a relative of {owner} on unit {unit}."
+      },
+      "unitDebts": {
+        "title": "Set a unit’s debt manually",
+        "description": "Sets one unit’s current debt, as a row of the unit debts sheet does: the amount replaces the debt shown on the unit and when creating an invoice. Zero and negative amounts are accepted.",
+        "unitNumber": "Unit number",
+        "subProject": "Sub-project",
+        "anySubProject": "The only unit with this number, or the one outside any sub-project",
+        "debitAmount": "Debt amount",
+        "save": "Set debt",
+        "saving": "Saving…",
+        "saved": "Unit {unit}’s debt is now {amount} (it was {previous}).",
+        "savedFirst": "Unit {unit}’s debt is now {amount}."
       }
     }
   },
