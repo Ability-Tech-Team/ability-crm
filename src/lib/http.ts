@@ -3,6 +3,8 @@ import { useMaintenanceStore } from '@/src/store/useMaintenanceStore';
 import { useSessionStore } from '@/src/store/useSessionStore';
 import { routing } from '@/src/i18n/routing';
 import { getApiBaseUrl } from './apiConfig';
+import { scopedProjectId } from './projectScope';
+import { applyProjectScope } from './projectScopeRequest';
 import {
   ApiError,
   readEnvelopeFailure,
@@ -57,7 +59,8 @@ api.interceptors.request.use((config) => {
   const locale = currentLocale();
   config.headers['Accept-Language'] = locale;
   config.headers.lang = locale;
-  return config;
+  // The Super Admin names the project of every call; nobody else has a scope.
+  return applyProjectScope(config, scopedProjectId());
 });
 
 function syncMaintenance(data: unknown) {

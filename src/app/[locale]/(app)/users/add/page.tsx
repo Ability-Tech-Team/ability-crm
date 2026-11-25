@@ -10,6 +10,7 @@ import { useRoutePrivileges } from '@/src/hooks/useCurrentUserPrivileges';
 import { useDropdowns } from '@/src/hooks/useDropdowns';
 import { PRIVILEGE_IDS } from '@/src/lib/currentUserPrivileges';
 import { getRoles, type RoleItem } from '@/src/services/roles';
+import { ALL_PROJECTS_ID } from '@/src/services/projects';
 import {
   createEmployee,
   updateEmployee,
@@ -127,18 +128,26 @@ export default function AddUser() {
   // ── Dropdowns ────────────────────────────────────────────────
   const { data: dropdowns } = useDropdowns();
   const [roleItems, setRoleItems] = useState<RoleItem[]>([]);
+  const isSuperAdmin = useIsSuperAdmin();
 
   useEffect(() => {
     const controller = new AbortController();
-    getRoles({ limit: 1000 }, controller.signal)
+    // The Super Admin's form can pick any project, so it lists every
+    // project's roles and shows the chosen project's (below).
+    getRoles(
+      {
+        limit: 1000,
+        ...(isSuperAdmin ? { project_id: ALL_PROJECTS_ID } : {}),
+      },
+      controller.signal,
+    )
       .then(({ roles: items }) => setRoleItems(items))
       .catch(() => {});
     return () => controller.abort();
-  }, []);
+  }, [isSuperAdmin]);
 
   // ── The user's project (the Super Admin only) ────────────────
   // Everyone else creates users in their own project and sees its roles only.
-  const isSuperAdmin = useIsSuperAdmin();
   const scopeProjects = useProjectScopeStore((s) => s.projects);
   const scopeProjectId = useProjectScopeStore((s) => s.projectId);
   const defaultProjectId = isEditMode

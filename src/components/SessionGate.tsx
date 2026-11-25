@@ -10,7 +10,10 @@ import { useSidebarStore } from '@/src/store/useSidebarStore';
 import { getAllDropdowns } from '@/src/services/dropdowns';
 import { getPrivileges } from '@/src/services/privileges';
 import { getCurrentUserPrivileges } from '@/src/services/sidebarMenu';
-import { getWorkingProjects } from '@/src/services/projects';
+import {
+  getWorkingProjects,
+  type AccessibleProject,
+} from '@/src/services/projects';
 import { useSession } from '@/src/hooks/useSession';
 import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
 import { browserSessionStorage } from '@/src/lib/assistantChat';
@@ -31,10 +34,12 @@ type LoadState = { key: string; status: 'ready' | 'failed' };
  * backend's `access_token` cookie is the session, and the API decides every
  * request.
  *
+ * - For the Super Admin, first picks the project to work in
+ *   (`src/lib/projectScope.ts`): the API wants it on every call, the
+ *   dropdowns' included.
  * - Loads the dropdowns, the user's permission tree, and the privilege
- *   catalogue (again when the locale or the menu changes), and for the Super
- *   Admin the projects to work in (`src/lib/projectScope.ts`), so the first
- *   call of every page already names its project.
+ *   catalogue (again when the locale, the menu, or the Super Admin's project
+ *   changes).
  * - A 401 from any call ends the session: the user goes to the Portal's
  *   sign-in and comes back to this page.
  * - A 403 `AUTH_PASSWORD_CHANGE_REQUIRED` blocks the app until the password
@@ -48,12 +53,20 @@ export default function SessionGate({ children }: { children: ReactNode }) {
   const isSuperAdmin = isSuperAdminRole(details.roleName);
   const { employeeId, companyProjectId } = details;
   const setProjectScope = useProjectScopeStore((s) => s.setScope);
+  const scopeProjectId = useProjectScopeStore((s) => s.projectId);
   const menuVersion = useSidebarStore((s) => s.menuVersion);
   const mustChangePassword = useSessionStore((s) => s.mustChangePassword);
   const endedReason = useSessionStore((s) => s.endedReason);
   const [attempt, setAttempt] = useState(0);
   const [loadState, setLoadState] = useState<LoadState | null>(null);
-  const requestKey = `${locale}:${menuVersion}:${attempt}`;
+  const [scopeReady, setScopeReady] = useState(false);
+  // Null while the Super Admin's project is still being picked.
+  const scopeKey = isSuperAdmin
+    ? scopeReady
+      ? String(scopeProjectId ?? 'sign-in-project')
+      : null
+    : 'own-project';
+  const requestKey = `${locale}:${menuVersion}:${attempt}:${scopeKey}`;
 
   const dropdowns = useDropdownsStore();
   const privileges = usePrivilegesStore();
@@ -74,8 +87,49 @@ export default function SessionGate({ children }: { children: ReactNode }) {
     setError: setCurrentUserPrivilegesError,
   } = currentUserPrivileges;
 
+  // The Super Admin's project, before anything that names it. Without the
+  // list the Super Admin still works, in the sign-in project.
   useEffect(() => {
-    if (mustChangePassword || endedReason) return;
+    if (!isSuperAdmin || mustChangePassword || endedReason) return;
+
+    const controller = new AbortController();
+    let isActive = true;
+
+    getWorkingProjects(controller.signal)
+      .catch((): AccessibleProject[] => [])
+      .then((projects) => {
+        if (!isActive) return;
+        const active = projects.filter((project) => project.active);
+        const current = useProjectScopeStore.getState().projectId;
+        setProjectScope(
+          active,
+          pickScopeProject(
+            active,
+            current ??
+              readStoredProjectScope(browserSessionStorage(), employeeId),
+            Number(companyProjectId) || null,
+          ),
+        );
+        setScopeReady(true);
+      });
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [
+    attempt,
+    locale,
+    mustChangePassword,
+    endedReason,
+    isSuperAdmin,
+    employeeId,
+    companyProjectId,
+    setProjectScope,
+  ]);
+
+  useEffect(() => {
+    if (mustChangePassword || endedReason || scopeKey === null) return;
 
     const controller = new AbortController();
     let isActive = true;
@@ -88,32 +142,14 @@ export default function SessionGate({ children }: { children: ReactNode }) {
       getAllDropdowns(controller.signal),
       getCurrentUserPrivileges(controller.signal),
       getPrivileges(),
-      // Without the list the Super Admin still works, in the sign-in project.
-      isSuperAdmin
-        ? getWorkingProjects(controller.signal).catch(() => [])
-        : Promise.resolve(null),
     ])
-      .then(
-        ([dropdownsResponse, userPrivileges, privilegeCatalogue, projects]) => {
-          if (!isActive) return;
-          setDropdowns(dropdownsResponse.result ?? {});
-          setCurrentUserPrivilegesData(userPrivileges);
-          setPrivilegesData(privilegeCatalogue);
-          if (projects) {
-            const active = projects.filter((project) => project.active);
-            const signInProjectId = Number(companyProjectId) || null;
-            setProjectScope(
-              active,
-              pickScopeProject(
-                active,
-                readStoredProjectScope(browserSessionStorage(), employeeId),
-                signInProjectId,
-              ),
-            );
-          }
-          setLoadState({ key: requestKey, status: 'ready' });
-        },
-      )
+      .then(([dropdownsResponse, userPrivileges, privilegeCatalogue]) => {
+        if (!isActive) return;
+        setDropdowns(dropdownsResponse.result ?? {});
+        setCurrentUserPrivilegesData(userPrivileges);
+        setPrivilegesData(privilegeCatalogue);
+        setLoadState({ key: requestKey, status: 'ready' });
+      })
       .catch((err: unknown) => {
         if (!isActive || controller.signal.aborted) return;
         const error =
@@ -136,12 +172,9 @@ export default function SessionGate({ children }: { children: ReactNode }) {
     };
   }, [
     requestKey,
+    scopeKey,
     mustChangePassword,
     endedReason,
-    isSuperAdmin,
-    employeeId,
-    companyProjectId,
-    setProjectScope,
     setDropdowns,
     setDropdownsLoading,
     setDropdownsError,

@@ -1,4 +1,6 @@
 import { getApiBaseUrl } from './apiConfig';
+import { scopedProjectId } from './projectScope';
+import { isProjectScopedRoute, withScopedParams } from './projectScopeRequest';
 
 const EXCEL_MIME_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -115,7 +117,13 @@ function buildExportUrl(
   const baseUrl = apiBaseUrl.replace(/\/+$/, '');
   const path = endpoint.replace(/^\/+/, '');
   const url = new URL(`${baseUrl}/${path}`, window.location.origin);
-  const exportParams: Record<string, unknown> = { is_excel: 1, ...params };
+  const scope = scopedProjectId();
+  // A download is a read: the Super Admin's project goes in its query.
+  const scopedParams =
+    scope !== undefined && isProjectScopedRoute(endpoint)
+      ? withScopedParams(params, scope)
+      : params;
+  const exportParams: Record<string, unknown> = { is_excel: 1, ...scopedParams };
 
   for (const [key, value] of Object.entries(exportParams)) {
     if (value === undefined || value === null || value === '') continue;

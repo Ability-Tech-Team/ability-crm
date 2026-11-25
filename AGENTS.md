@@ -88,10 +88,14 @@ the workspace instead of assuming it exists.
     hidden buttons are presentation.
 - **The Super Admin's project (2026-11-25):** the Super Admin
   (`src/lib/superAdmin.ts`) picks the project to work in from the header
-  (`src/store/useProjectScopeStore.ts`, `src/lib/projectScope.ts`, loaded by
-  `SessionGate` from `GET /projects/accessible`). Services send it with
-  `projectScopeParam()` on every route that takes a `project_id` (the units
-  routes require it from the Super Admin) and never where the route refuses one. List
+  (`src/store/useProjectScopeStore.ts`, `src/lib/projectScope.ts`, picked by
+  `SessionGate` from `GET /projects/accessible` before the dropdowns and
+  menus load, and again on every switch). Since 2026-11-25 every project route
+  of the API requires it from the Super Admin (the units rule), so
+  `src/lib/http.ts` and `src/lib/exportExcel.ts` add it to every call except
+  the routes without a project listed in `src/lib/projectScopeRequest.ts`
+  (query for a read, body for a write); a `project_id` the caller names wins
+  (`projectScopeParam()`, a unit's own project, a screen's filter). List
   screens add `useProjectFilter()` (`src/lib/projectFilter.ts`), shown to the
   Super Admin only. Projects and Sub-projects definitions are for the Super
   Admin only (`superAdminOnly` route rules; the sidebar adds them). Nothing changes for

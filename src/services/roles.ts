@@ -31,6 +31,8 @@ export interface GetRolesParams {
   role_name?: string;
   page?: number;
   limit?: number;
+  /** The Super Admin's project, or 1 for every project's roles. */
+  project_id?: number;
 }
 
 export async function getRoles(
@@ -40,6 +42,7 @@ export async function getRoles(
   const response = await api.get<GetRolesRaw>('/roles', {
     params: {
       ...(params.role_name ? { role_name: params.role_name } : {}),
+      ...(params.project_id ? { project_id: params.project_id } : {}),
       page: params.page ?? 1,
       limit: params.limit ?? 10,
     },

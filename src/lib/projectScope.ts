@@ -3,10 +3,12 @@ import { useProjectScopeStore } from '@/src/store/useProjectScopeStore';
 
 /**
  * The Super Admin's working project (the user's decision, 2026-11-25). The
- * header's picker sets it; every call whose route takes a `project_id` sends
- * it, and each screen's Project filter starts at it. The units routes require
- * it from the Super Admin (`writeProjectId`/`readProjectIds` in
- * ability-crm-api). Everyone else has no scope and sends no `project_id`.
+ * header's picker sets it, and each screen's Project filter starts at it.
+ * Every project route of the API requires it from the Super Admin
+ * (`writeProjectId`/`readProjectIds` in ability-crm-api), so the HTTP client
+ * and the Excel exports add it to every such call that doesn't name its own
+ * (`src/lib/projectScopeRequest.ts`). Everyone else has no scope and sends no
+ * `project_id`.
  *
  * The choice lasts as long as the browser tab, in `sessionStorage` under the
  * employee's id, and logout clears it. It is a preference, not an access
